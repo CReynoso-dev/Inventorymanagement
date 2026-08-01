@@ -26,4 +26,3 @@ def config():
 
 
 
-print(config())
