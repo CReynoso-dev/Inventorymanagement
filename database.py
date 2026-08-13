@@ -2,6 +2,15 @@ import sqlite3
 import databaseconfig
 
 
+def Search_function_cc(CurrentDatabase,Text_to_search):
+    con = sqlite3.connect(CurrentDatabase)
+    cursor = con.cursor()
+    g =cursor.execute(f"SELECT * FROM customer_contact_info WHERE customer_name LIKE '%{Text_to_search}%' OR customer_number LIKE '%{Text_to_search}%' OR customer_email LIKE '%{Text_to_search}%';")
+    data = g.fetchall()
+
+
+
+    return data
 
 
 def access():
@@ -116,5 +125,5 @@ def edit_table_edit(current_database):
 
 
 
-edit_table_edit("inventoryonhand.db")
+Search_function_cc("inventoryonhand.db","")
 #startup_table()

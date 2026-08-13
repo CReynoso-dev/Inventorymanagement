@@ -1,8 +1,11 @@
 import sys
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QSizePolicy, QStackedWidget, QToolBar, QScrollArea
+from PySide6.QtCore import Qt, QSize, QMetaMethod
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QSizePolicy, QStackedWidget, QToolBar, QScrollArea,QLayout, QLineEdit, QFrame, QGridLayout,QHBoxLayout
 from PySide6.QtGui import QAction, QActionEvent
-from PySide6.QtHelp import QHelpSearchEngine, QHelpEngineCore
+
+import database
+from database import Search_function_cc
+
 
 
 class MainWindow(QMainWindow):
@@ -69,9 +72,11 @@ class MainWindow(QMainWindow):
         return page
     def Customer_contact_screen(self):
         page = QWidget()
-        layout = QVBoxLayout(page)
-        cc_scrollbar = QScrollArea()
-        cc_toolbar = QToolBar("customer Contact",allowedAreas=Qt.ToolBarArea.TopToolBarArea)
+        self.layout_cc = QVBoxLayout(page)
+        datatest = QLabel("fuckyou\nh\nhey\nhey\nhey")
+
+
+        self.cc_toolbar = QToolBar("customer Contact",allowedAreas=Qt.ToolBarArea.TopToolBarArea)
         buttonBacktoMain = QAction("Back",parent=page)
         buttonAddCustomerInfo = QAction("Add",parent=page)
         buttonRemoveCustomerInfo = QAction("Remove",parent=page)
@@ -79,23 +84,76 @@ class MainWindow(QMainWindow):
 
 
 
-        cc_toolbar.addAction(buttonBacktoMain)
-        cc_toolbar.addAction(buttonAddCustomerInfo)
-        cc_toolbar.addAction(buttonRemoveCustomerInfo)
-        cc_toolbar.addAction(buttonEditCustomerInfo)
 
-        search_engine_config = QHelpEngineCore()
-        search_engine = QHelpSearchEngine()
+        self.cc_toolbar.addAction(buttonBacktoMain)
+        self.cc_toolbar.addAction(buttonAddCustomerInfo)
+        self.cc_toolbar.addAction(buttonRemoveCustomerInfo)
+        self.cc_toolbar.addAction(buttonEditCustomerInfo)
 
-        layout.addWidget(cc_toolbar, alignment=Qt.AlignmentFlag.AlignTop)
-        layout.addWidget(cc_scrollbar)
-        #layout.addWidget(search_engine)
+
+        self.search_bar_cc = QLineEdit(parent=page)
+
+
+
+        self.scrollbar_widget_cc = QWidget()
+        self.scrollbar_layout_cc = QGridLayout(self.scrollbar_widget_cc)
+        self.cc_scrollbar = QScrollArea()
+        self.scrollbar_layout_cc.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.cc_scrollbar.setWidgetResizable(True)
+
+
+        self.scrollbar_layout_cc.setSpacing(0)
+        self.scrollbar_layout_cc.setContentsMargins(0,0,0,0)
+
+
+        self.cc_scrollbar.setWidget(self.scrollbar_widget_cc)
+        self.cc_scrollbar.setLayout(self.scrollbar_layout_cc)
+        self.search_bar_cc.returnPressed.connect(self.update_display_cc)
+
+
+
+
+
+        self.layout_cc.addWidget(self.cc_toolbar, alignment=Qt.AlignmentFlag.AlignTop)
+
+        self.layout_cc.addWidget(self.search_bar_cc,alignment=Qt.AlignmentFlag.AlignTop)
+        #layout.addWidget(datatest)
+        self.layout_cc.addWidget(self.cc_scrollbar)
 
 
 
 
 
         return page
+    def update_display_cc(self):
+        search_input = self.search_bar_cc.text()
+        search_output = database.Search_function_cc("inventoryonhand.db",search_input)
+        for i in range(len(search_output)):
+            beep = search_output[i]
+            print(beep,"outer")
+            for z in range(len(search_output[0])):
+                print(beep[z],"inner")
+
+
+
+                self.scrollbar_layout_cc.addWidget(QLabel(f"{beep[z]}"))
+
+
+
+
+        return print(search_output)
+    #you ended with being able to add the stuff on you need to figure out how to remove it set the borders and make it scrollable its not scrolling
+
+
+
+
+
+
+
+
+
+
+
 
 
 
