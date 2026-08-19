@@ -1,11 +1,20 @@
 import sqlite3
 import databaseconfig
+from PySide6.QtWidgets import QLabel, QLineEdit
 
 
+
+
+def add_customer_data(CurrentDatabase,text1):
+    conn = sqlite3.connect(CurrentDatabase)
+    cursor = conn.cursor()
+    cursor.execute(f"INSERT INTO customer_contact_info (customer_name,customer_number,customer_email) VALUES (?,?,?)",text1.split(","))
+    conn.commit()
+    return
 def Search_function_cc(CurrentDatabase,Text_to_search):
     con = sqlite3.connect(CurrentDatabase)
     cursor = con.cursor()
-    g =cursor.execute(f"SELECT * FROM customer_contact_info WHERE customer_name LIKE '%{Text_to_search}%' OR customer_number LIKE '%{Text_to_search}%' OR customer_email LIKE '%{Text_to_search}%';")
+    g =cursor.execute(f"SELECT * FROM customer_contact_info WHERE customer_name LIKE '{Text_to_search}%' OR customer_number LIKE '{Text_to_search}%' OR customer_email LIKE '{Text_to_search}%';")
     data = g.fetchall()
 
 
@@ -23,6 +32,7 @@ def startup_table():
     cursor = con.cursor()
 
     cursor.execute("CREATE TABLE Product(id INTEGER PRIMARY KEY,Name,Quantity,")
+
 
 
 def edit_table_insert(current_database):
@@ -125,5 +135,5 @@ def edit_table_edit(current_database):
 
 
 
-Search_function_cc("inventoryonhand.db","")
+#add_customer_data("inventoryonhand.db","")
 #startup_table()
