@@ -21,11 +21,15 @@ class MainWindow(QMainWindow):
         self.starter_screen = self.Starting_screen()
         self.main_screen = self.Main_screen()
         self.customer_contact_screen = self.Customer_contact_screen()
-        self.add_customer_contact_info = self.add_cc_screen()
+        self.add_customer_contact_info = self.Add_cc_screen()
+        self.delete_customer_info = self.Delete_cc_screen()
+        self.district = self.Stores_screen()
+        self.book_widgit.addWidget(self.district)
         self.book_widgit.addWidget(self.starter_screen)
         self.book_widgit.addWidget(self.main_screen)
         self.book_widgit.addWidget(self.customer_contact_screen)
         self.book_widgit.addWidget(self.add_customer_contact_info)
+        self.book_widgit.addWidget(self.delete_customer_info)
 
         self.Switch_Starting_screen()
 
@@ -58,6 +62,7 @@ class MainWindow(QMainWindow):
         buttonInfop = QAction("Info",parent=page)
         buttonCustomerContactp = QAction("Customer Contact",parent=page)
         buttonCustomerContactp.triggered.connect(self.Switch_Customer_contact_screen)
+        buttonStoresp.triggered.connect(self.Switch_Stores_screen)
 
 
         toolbar.addAction(buttonAlertp)
@@ -93,7 +98,8 @@ class MainWindow(QMainWindow):
         self.cc_toolbar.addAction(buttonEditCustomerInfo)
 
         buttonBacktoMain.triggered.connect(self.Switch_Main_screen)
-        buttonAddCustomerInfo.triggered.connect(self.switch_add_customer_info)
+        buttonAddCustomerInfo.triggered.connect(self.Switch_add_customer_info)
+        buttonRemoveCustomerInfo.triggered.connect(self.Switch_delete_customer_info)
         #buttonAddCustomerInfo.triggered.connect()
 
 
@@ -138,7 +144,7 @@ class MainWindow(QMainWindow):
 
         return page
 
-    def add_cc_screen(self):
+    def Add_cc_screen(self):
         page = QWidget()
         layout_add_cc_screen = QVBoxLayout(page)
 
@@ -171,6 +177,36 @@ class MainWindow(QMainWindow):
 
         database.add_customer_data("inventoryonhand.db",text)
 
+    def Delete_cc_screen(self):
+        page = QWidget()
+        Delete_cc_screen_layout = QVBoxLayout(page)
+        Delete_cc_toolbar = QToolBar("delete screen toolbar",allowedAreas=Qt.ToolBarArea.TopToolBarArea)
+        backbutton = QAction("Back",parent=page)
+        refreshbutton = QAction("Refresh",parent=page)
+        Delete_cc_toolbar.addAction(backbutton)
+        Delete_cc_toolbar.addAction(refreshbutton)
+        backbutton.triggered.connect(self.Switch_Customer_contact_screen)
+
+        Delete_cc_scrollarea_widget = QWidget()
+        self.Delete_cc_scrollarea_layout = QGridLayout(Delete_cc_scrollarea_widget)
+        Delete_cc_scrollarea = QScrollArea()
+        self.Delete_cc_scrollarea_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
+        Delete_cc_scrollarea.setWidgetResizable(True)
+        self.Delete_cc_scrollarea_layout.setSpacing(0)
+        self.Delete_cc_scrollarea_layout.setContentsMargins(0,0,0,0)
+        Delete_cc_scrollarea.setWidget(Delete_cc_scrollarea_widget)
+
+
+
+
+        Delete_cc_screen_layout.addWidget(Delete_cc_toolbar, alignment=Qt.AlignmentFlag.AlignTop)
+        Delete_cc_screen_layout.addWidget(Delete_cc_scrollarea)
+
+
+
+
+
+        return page
 
 
 
@@ -229,13 +265,26 @@ class MainWindow(QMainWindow):
         self.book_widgit.setCurrentWidget(self.starter_screen)
     def Switch_Main_screen(self):
         self.book_widgit.setCurrentWidget(self.main_screen)
-    def switch_add_customer_info(self):
+    def Switch_add_customer_info(self):
         self.book_widgit.setCurrentWidget(self.add_customer_contact_info)
+    def Switch_delete_customer_info(self):
+        self.book_widgit.setCurrentWidget(self.delete_customer_info)
+
 
     def Switch_Alerts_screen(self):
         pass
     def Switch_Stores_screen(self):
+        self.book_widgit.setCurrentWidget(self.district)
+
         pass
+    def Stores_screen(self):
+        page = QWidget()
+        stores_layout = QVBoxLayout(page)
+
+
+
+
+        return page
     def Switch_Customer_contact_screen(self):
         self.book_widgit.setCurrentWidget(self.customer_contact_screen)
     def Switch_Statistics_screen(self):

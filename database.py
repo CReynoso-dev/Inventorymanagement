@@ -4,7 +4,8 @@ from PySide6.QtWidgets import QLabel, QLineEdit
 
 
 
-
+def delete_customer_data(CurrentDatabase,rowtodelete):
+    pass
 def add_customer_data(CurrentDatabase,text1):
     conn = sqlite3.connect(CurrentDatabase)
     cursor = conn.cursor()
