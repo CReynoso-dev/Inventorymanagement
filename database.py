@@ -1,6 +1,8 @@
 import sqlite3
 import databaseconfig
+import PySide6
 from PySide6.QtWidgets import QLabel, QLineEdit
+from Scanning_data import scanner_reader
 
 
 
@@ -15,24 +17,34 @@ def add_customer_data(CurrentDatabase,text1):
 def Search_function_cc(CurrentDatabase,Text_to_search):
     con = sqlite3.connect(CurrentDatabase)
     cursor = con.cursor()
-    g =cursor.execute(f"SELECT * FROM customer_contact_info WHERE customer_name LIKE '{Text_to_search}%' OR customer_number LIKE '{Text_to_search}%' OR customer_email LIKE '{Text_to_search}%';")
+    table = 'product'
+
+    g = cursor.execute(f"SELECT name FROM pragma_table_info('{table}')")
+    #g =cursor.execute(f"SELECT * FROM product WHERE customer_name LIKE '{Text_to_search}%' OR customer_number LIKE '{Text_to_search}%' OR customer_email LIKE '{Text_to_search}%';")
     data = g.fetchall()
 
 
 
-    return data
+    return print(data[:])
+def default_storage():
+    pass
 
 
-def access():
-    database = databaseconfig.config()
-    connection = sqlite3.connect(database)
-    return connection
 
-def startup_table():
-    con = access()
+def Creation_of_database(nod):
+    con = sqlite3.connect(f"{nod}")
     cursor = con.cursor()
 
-    cursor.execute("CREATE TABLE Product(id INTEGER PRIMARY KEY,Name,Quantity,")
+    cursor.execute("CREATE TABLE Product(id INTEGER PRIMARY KEY,Name,Quantity,Description")
+    cursor.execute("CREATE TABLE Customer_data(Name,Number,Email,TimeWith)")
+def Adding_product_upc(nod,upc):
+    con = sqlite3.connect(f"{nod}")
+    cursor = con.cursor()
+    cursor.execute(f"INSERT INTO product (id) VALUES(?)",(upc,),)
+    con.commit()
+
+
+
 
 
 
@@ -135,6 +147,8 @@ def edit_table_edit(current_database):
         connection.commit()
 
 
-
-#add_customer_data("inventoryonhand.db","")
+#edit_table_edit("inventoryonhand.db")
+Search_function_cc("inventoryonhand.db","hey")
+#scanner = scanner_reader()
+#Adding_product_upc("inventoryonhand.db",scanner.start_reader(True))
 #startup_table()
