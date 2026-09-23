@@ -5,7 +5,6 @@ from PySide6.QtWidgets import QLabel, QLineEdit
 from Scanning_data import scanner_reader
 
 
-
 def delete_customer_data(CurrentDatabase,rowtodelete):
     pass
 def add_customer_data(CurrentDatabase,text1):
@@ -14,18 +13,18 @@ def add_customer_data(CurrentDatabase,text1):
     cursor.execute(f"INSERT INTO customer_contact_info (customer_name,customer_number,customer_email) VALUES (?,?,?)",text1.split(","))
     conn.commit()
     return
-def Search_function_cc(CurrentDatabase,Text_to_search):
+def Search_function_cc(CurrentDatabase,Table,Text_to_search):
     con = sqlite3.connect(CurrentDatabase)
     cursor = con.cursor()
-    table = 'product'
-
-    g = cursor.execute(f"SELECT name FROM pragma_table_info('{table}')")
-    #g =cursor.execute(f"SELECT * FROM product WHERE customer_name LIKE '{Text_to_search}%' OR customer_number LIKE '{Text_to_search}%' OR customer_email LIKE '{Text_to_search}%';")
-    data = g.fetchall()
 
 
+    table_data = cursor.execute(f"SELECT name FROM pragma_table_info('{Table}')")
+    data = table_data.fetchall()
+    lookup_sql =cursor.execute(f"SELECT * FROM {Table} WHERE {data[0][0]} LIKE '{Text_to_search}%' OR {data[1][0]} LIKE '{Text_to_search}%' OR {data[2][0]} LIKE '{Text_to_search}%' OR {data[3][0]} LIKE '{Text_to_search}%';")
+    search_bar_data = lookup_sql.fetchall()
 
-    return print(data[:])
+
+    return search_bar_data
 def default_storage():
     pass
 
@@ -148,7 +147,6 @@ def edit_table_edit(current_database):
 
 
 #edit_table_edit("inventoryonhand.db")
-Search_function_cc("inventoryonhand.db","hey")
-#scanner = scanner_reader()
-#Adding_product_upc("inventoryonhand.db",scanner.start_reader(True))
+Search_function_cc("inventoryonhand.db","product","hey")
+
 #startup_table()

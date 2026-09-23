@@ -157,7 +157,8 @@ When your problems are endless, throw them in the ocean.""")
         back = QPushButton("Back")
         horizantal.addWidget(back)
         horizantal.addWidget(next)
-
+        scanner = scanner_reader()
+        database.Adding_product_upc("inventoryonhand.db", scanner.start_reader(True))
 
         actual_product_l.addWidget(template1,1,0)
         actual_product_l.addWidget(template2,1,1)

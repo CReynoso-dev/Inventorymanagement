@@ -215,7 +215,7 @@ class MainWindow(QMainWindow):
             self.scrollbar_layout_cc.itemAt(i).widget().setParent(None)
     def update_display_cc(self):
         search_input = self.search_bar_cc.text()
-        search_output = database.Search_function_cc("inventoryonhand.db",search_input)
+        search_output = database.Search_function_cc("inventoryonhand.db","customer_contact_info",search_input)
 
         row_n = 0
         for i in range(len(search_output)):
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
 
 
 
-        return print(search_output)
+        return search_output
     #you ended with being able to add the stuff on you need to figure out how to remove it set the borders and make it scrollable its not scrolling
 
 
