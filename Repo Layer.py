@@ -1,7 +1,8 @@
 from database import Database
+
 class Repository(Database):
-    def __init__(self):
-        super().__init__("superb.db")
+    def __init__(self,db_path):
+        super().__init__(db_path)
 
 
     def Search_product(self, search):
@@ -18,14 +19,15 @@ class Repository(Database):
         """, (search + "%",))
 
     def Add_product(self, upc, name, quantity, description):
-        self._Execute("""INSERT INTO Product VALUES (?,?,?,?)
+        self.connection.execute("""INSERT INTO Product VALUES (?,?,?,?)
 
 
 
         """, (upc, name, quantity, description))
 
+
     def Add_customer_info(self, customer_id, name, number, email, timewith):
-        self._Execute("""INSERT INTO Customer_Info VALUES (?,?,?,?,?)
+        self.connection.execute("""INSERT INTO Customer_Info VALUES (?,?,?,?,?)
 
 
 
@@ -46,7 +48,7 @@ class Repository(Database):
         u_paramaters.append(customer_id)
 
         print(u_paramaters)
-        self._Execute(f"""UPDATE Customer_Info 
+        self.connection.execute(f"""UPDATE Customer_Info 
         SET {u_query.rstrip(",")}
         WHERE customer_id = ?
 
@@ -69,7 +71,7 @@ class Repository(Database):
         u_paramaters.append(upc)
 
         print(u_paramaters)
-        self._Execute(f"""UPDATE Product 
+        self.connection.execute(f"""UPDATE Product 
                 SET {u_query.rstrip(",")}
                 WHERE upc = ?
 
@@ -78,7 +80,7 @@ class Repository(Database):
 
                 """, u_paramaters)
     def Delete_product_info(self,product_id: str):
-        self._Execute("""DELETE FROM Product
+        self.connection.execute("""DELETE FROM Product
                       WHERE product_id = ?
                       
         
@@ -87,7 +89,7 @@ class Repository(Database):
         """,(product_id,))
 
     def Delete_customer_info(self,customer_id: str):
-        self._Execute("""DELETE FROM Customer_info
+        self.connection.execute("""DELETE FROM Customer_info
                               WHERE customer_id = ?
 
 
@@ -95,21 +97,19 @@ class Repository(Database):
 
                 """, (customer_id,))
 
-    def Group_commands(self):
-        try:
-            with self.connection:
-                self.Delete_customer_info("209388")
-                self.Add_customer_info(customer_id="204467777899",name="christian",number="3474375363",email="bandcrrr@gmail.com",timewith="0")
-                self.Add_customer_info(customer_id="204467777899",name="christian",number="3474375363",email="bandcrrr@gmail.com",timewith="0")
-        except:
-            print("rollback")
 
 
 
-repo = Repository()
-#repo.Group_commands()
+
+repo = Repository("superb.db")
+with repo.Transactions():
+    print(repo.Search_customer("christiany"))
+
+
+
 print(repo.connection.in_transaction)
-repo.Add_customer_info(customer_id="20499",name="christian",number="3474375363",email="bandcrrr@gmail.com",timewith="0")
+
+
 print(repo.connection.in_transaction)
 
 

@@ -3,20 +3,31 @@ import databaseconfig
 import PySide6
 from PySide6.QtWidgets import QLabel, QLineEdit
 from Scanning_data import scanner_reader
+from contextlib import contextmanager
 
-class Database:
+class Database():
 
     def __init__(self,db_path):
         self.connection = sqlite3.connect(db_path)
         self.cursor = self.connection.cursor()
 
         self.Create_Tables()
-    def _Execute(self,query,parameters = ()):
+    def _Execute(self,query,parameters):
         self.cursor.execute(query,parameters)
         self.connection.commit()
     def _Fetchall(self,query,parameters = ()):
         self.cursor.execute(query,parameters)
         return self.cursor.fetchall()
+    @contextmanager
+    def Transactions(self):
+        try:
+            yield
+            self.connection.commit()
+        except:
+            raise
+
+
+
     def Create_Tables(self):
         self.cursor.execute(""" CREATE TABLE IF NOT EXISTS Product(product_id TEXT PRIMARY KEY,
                                                                    upc TEXT,
