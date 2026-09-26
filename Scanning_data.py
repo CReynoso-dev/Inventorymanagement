@@ -5,7 +5,7 @@ class scanner_reader():
         self.baudrate = 9600
 
 
-    def start_reader(self,onoroff):
+    def start_reader(self,onoroff): # you need to change this to not be a loop because it fucks with pyside6 PUT It into a thread aside from the main gui thread
         connection = serial.Serial(port=self.port,baudrate=self.baudrate)
         fullUPC = b""
         while onoroff:
