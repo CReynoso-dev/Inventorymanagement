@@ -43,11 +43,11 @@ class Repository(Database):
                 confirmed_updates[key] = value
         for column, value in confirmed_updates.items():
             u_query += f"{column} = ?,"
-            print(column)
+
             u_paramaters.append(value)
         u_paramaters.append(customer_id)
 
-        print(u_paramaters)
+
         self.connection.execute(f"""UPDATE Customer_Info 
         SET {u_query.rstrip(",")}
         WHERE customer_id = ?
@@ -66,11 +66,11 @@ class Repository(Database):
                 confirmed_updates[key] = value
         for column, value in confirmed_updates.items():
             u_query += f"{column} = ?,"
-            print(column)
+
             u_paramaters.append(value)
         u_paramaters.append(upc)
 
-        print(u_paramaters)
+
         self.connection.execute(f"""UPDATE Product 
                 SET {u_query.rstrip(",")}
                 WHERE upc = ?
@@ -102,8 +102,6 @@ class Repository(Database):
 
 
 repo = Repository("superb.db")
-with repo.Transactions():
-    print(repo.Search_customer("christiany"))
 
 
 
