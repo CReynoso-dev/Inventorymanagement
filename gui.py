@@ -3,13 +3,16 @@ from PySide6.QtCore import Qt, QSize, QMetaMethod
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QSizePolicy, QStackedWidget, QToolBar, QScrollArea,QLayout, QLineEdit, QFrame, QGridLayout,QHBoxLayout
 from PySide6.QtGui import QAction, QActionEvent
 
-import database
-from database import Search_function_cc
+from database import Database
+from Service import Service
+from Repository import Repository
+
 
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self,serv):
+        self.services = serv
         super().__init__()
 
 
@@ -214,29 +217,21 @@ class MainWindow(QMainWindow):
         for i in reversed(range(self.scrollbar_layout_cc.count())):
             self.scrollbar_layout_cc.itemAt(i).widget().setParent(None)
     def update_display_cc(self):
-        search_input = self.search_bar_cc.text()
-        search_output = database.Search_function_cc("inventoryonhand.db","customer_contact_info",search_input)
-
-        row_n = 0
-        for i in range(len(search_output)):
-            column_n = -1
-            row_n += 1
-
-            beep = search_output[i]
-            print(beep,"outer")
-            for z in range(len(search_output[0])):
-                column_n+=1
-
-
-                print(beep[z],"inner")
-                g= QLabel(f"{beep[z]}")
-                g.setFrameShape(QFrame.Shape.Box)
-                g.setSizePolicy(QSizePolicy.Policy.Preferred,QSizePolicy.Policy.Fixed)
-                
-
-
-
-                self.scrollbar_layout_cc.addWidget(g,row_n,column_n)
+        search_input = self.search_bar_cc
+        text = search_input.text()
+        search_output = self.services.Lookup_customer(text)
+        print(search_output)
+        rowcounter = -1
+        columncounter = 0
+        for result in search_output:
+            rowcounter+=1
+            columncounter = 0
+            for data in result:
+                columncounter+=1
+                column = QLabel(f"{data}")
+                column.setStyleSheet("""boarder: 2px solid black;
+                                     """)
+                self.scrollbar_layout_cc.addWidget(column,rowcounter,columncounter)
 
 
 
@@ -244,7 +239,11 @@ class MainWindow(QMainWindow):
 
 
 
-        return search_output
+
+
+
+
+        return
     #you ended with being able to add the stuff on you need to figure out how to remove it set the borders and make it scrollable its not scrolling
 
 
@@ -300,6 +299,9 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MainWindow()
+    db = Database("superb.db")
+    repo = Repository(db)
+    serv = Service(repo)
+    window = MainWindow(serv)
     window.show()
     sys.exit(app.exec())

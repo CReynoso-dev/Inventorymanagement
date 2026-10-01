@@ -8,8 +8,10 @@ from contextlib import contextmanager
 class Database():
 
     def __init__(self,db_path):
-        self.connection = sqlite3.connect(db_path)
+        self.connection = sqlite3.connect(db_path,check_same_thread=False)
+
         self.cursor = self.connection.cursor()
+
 
         self.Create_Tables()
     def _Execute(self,query,parameters):

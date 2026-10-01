@@ -1,33 +1,33 @@
 from database import Database
 
 class Repository(Database):
-    def __init__(self,db_path):
-        super().__init__(db_path)
-
+    def __init__(self,db):
+        #super().__init__(db_path)
+        self.db = db
 
     def Search_product(self, search):
-        return self._Fetchall("""SELECT * FROM Product WHERE Name LIKE ?
+        return self.db._Fetchall("""SELECT * FROM Product WHERE Name LIKE ?
 
 
         """, (search + "%",))
 
     def Search_customer(self, search):
-        return self._Fetchall("""SELECT * FROM Customer_Info WHERE Name LIKE ?
+        return self.db._Fetchall("""SELECT * FROM Customer_Info WHERE Name LIKE ?
 
 
 
         """, (search + "%",))
 
-    def Add_product(self, upc, name, quantity, description):
-        self.connection.execute("""INSERT INTO Product VALUES (?,?,?,?)
+    def Add_product(self,product_id, upc, name, quantity,price, description):
+        self.db.cursor.execute("""INSERT INTO Product VALUES (?,?,?,?,?,?)
 
 
 
-        """, (upc, name, quantity, description))
+        """, (product_id,upc, name, quantity, price, description))
 
 
     def Add_customer_info(self, customer_id, name, number, email, timewith):
-        self.connection.execute("""INSERT INTO Customer_Info VALUES (?,?,?,?,?)
+        self.db.cursor.execute("""INSERT INTO Customer_Info VALUES (?,?,?,?,?)
 
 
 
@@ -48,7 +48,7 @@ class Repository(Database):
         u_paramaters.append(customer_id)
 
 
-        self.connection.execute(f"""UPDATE Customer_Info 
+        self.db.cursor.execute(f"""UPDATE Customer_Info 
         SET {u_query.rstrip(",")}
         WHERE customer_id = ?
 
@@ -56,8 +56,8 @@ class Repository(Database):
 
 
         """, u_paramaters)
-    def Edit_product_info(self,upc: str,name = None,quantity = None,description = None):
-        update_check = {"Name": name, "Quantity": quantity, "Description": description}
+    def Edit_product_info(self,product_id,upc = None,name = None,quantity = None,description = None):
+        update_check = {"upc":upc,"Name": name, "Quantity": quantity, "Description": description}
         confirmed_updates = {}
         u_query = ""
         u_paramaters = []
@@ -68,19 +68,19 @@ class Repository(Database):
             u_query += f"{column} = ?,"
 
             u_paramaters.append(value)
-        u_paramaters.append(upc)
+        u_paramaters.append(product_id)
 
 
-        self.connection.execute(f"""UPDATE Product 
+        self.db.cursor.execute(f"""UPDATE Product 
                 SET {u_query.rstrip(",")}
-                WHERE upc = ?
+                WHERE product_id = ?
 
 
 
 
                 """, u_paramaters)
     def Delete_product_info(self,product_id: str):
-        self.connection.execute("""DELETE FROM Product
+        self.db.cursor.execute("""DELETE FROM Product
                       WHERE product_id = ?
                       
         
@@ -89,27 +89,30 @@ class Repository(Database):
         """,(product_id,))
 
     def Delete_customer_info(self,customer_id: str):
-        self.connection.execute("""DELETE FROM Customer_info
+        self.db.cursor.execute("""DELETE FROM Customer_info
                               WHERE customer_id = ?
 
 
 
 
                 """, (customer_id,))
+    def Add_sale(self,transaction_id,customer_id,time,completed):
+        self.db.cursor.execute("""INSERT INTO Sales VALUES (?,?,?,?)""",(transaction_id,customer_id,time,completed))
+    def Add_itemsale(self,transaction_id,product_id,quantity,price):
+        self.db.cursor.execute("""INSERT INTO itemsale VALUES (?,?,?,?)""",(transaction_id,product_id,quantity,price))
 
 
 
 
 
-repo = Repository("superb.db")
 
 
 
-print(repo.connection.in_transaction)
 
 
-print(repo.connection.in_transaction)
 
+#db = Database("superb.db")
+#repo = Repository(db)
 
 #repo.Delete_customer_info("209388292")
 #repo.Edit_product_info(927383,name="pphead")
