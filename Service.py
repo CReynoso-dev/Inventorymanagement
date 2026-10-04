@@ -4,7 +4,7 @@ from database import Database
 
 import typing
 
-class Service(Repository):
+class Service():
     def __init__(self,repository):
         #super().__init__(db_path)
         self.repo = repository
@@ -27,15 +27,17 @@ class Service(Repository):
             else:
                 raise TypeError(f"Input {arg} is the wrong type")
         print("you did it ")
-        repo.Add_product(product_id,upc,name,quantity,price,description)
+        self.repo.Add_product(product_id,upc,name,quantity,price,description)
     def Delete_item(self,product_id : int):
         if type(product_id) == int:
-            repo.Delete_product_info(product_id=product_id)
+            self.repo.Delete_product_info(product_id=product_id)
         else:
             raise TypeError("Product_id is wrong type must be int")
     def Edit_item_info(self):
+        pass
 
-db = Database("superb.db")
-repo = Repository(db)
-serv = Service(repo)
+#db = Database("superb.db")
+#repo = Repository(db)
+#serv = Service(repo)
+#print(serv.Lookup_product("cups"))
 

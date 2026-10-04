@@ -1,6 +1,6 @@
 from database import Database
 
-class Repository(Database):
+class Repository():
     def __init__(self,db):
         #super().__init__(db_path)
         self.db = db

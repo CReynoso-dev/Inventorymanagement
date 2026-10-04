@@ -1,9 +1,69 @@
 import sqlite3
-import databaseconfig
-import PySide6
-from PySide6.QtWidgets import QLabel, QLineEdit
-from Scanning_data import scanner_reader
+import uuid
+from typing import List
 from contextlib import contextmanager
+from sqlalchemy import create_engine,column,Integer,String,ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker,session,mapped_column,Mapped,validates,relationship
+from email_validator import validate_email,EmailNotValidError
+
+engine = create_engine("sqlite///store.db",connect_args={"check_same_thread":False})
+sessionlocal = sessionmaker(autocommit=False,autoflush=False,bind=engine)
+base = declarative_base()
+
+class Customer(base):
+    __tablename__ = "Customer_info"
+    customer_id : Mapped[uuid.uuid4()] = mapped_column(primary_key=True)
+    name : Mapped[str] = mapped_column(String(50))
+    number : Mapped[str] = mapped_column(String(10))
+    email : Mapped[str] = mapped_column(String(55))
+    timewith : Mapped[int] = mapped_column(Integer)
+
+    sales : Mapped[List["Sales"]] = relationship(back_populates="Sales")
+
+
+
+    @validates("email")
+    def Email_checker(self,key,address):
+        if not address:
+            raise ValueError("No email detected")
+        try:
+            email_info = validate_email(address,check_deliverability=False)
+
+            return email_info.normalized
+        except EmailNotValidError as error:
+            print(f"Email invalid: {error}")
+class Product(base):
+    __tablename__ = "Product"
+    product_id : Mapped[uuid.uuid4()] = mapped_column(primary_key=True)
+    upc : Mapped[str] = mapped_column(String(12))
+    name : Mapped[str] = mapped_column(String(80))
+    quantity : Mapped[int] = mapped_column(Integer)
+    price : Mapped[int] = mapped_column(Integer)
+    description : Mapped[str] = mapped_column(String(99))
+
+class Sales(base):
+    __tablename__ = "Sales"
+    transaction_id : Mapped[uuid.uuid4()] = mapped_column(primary_key=True)
+    customer_id : Mapped[uuid.uuid4()] = mapped_column(ForeignKey("Customer_info.customer_id"))
+
+    customer : Mapped["Customer"] = relationship(back_populates="Sales")
+    itemsale : Mapped["Itemsale"] = relationship(back_populates="Sales")
+class Itemsale(base):
+    __tablename__ = "Itemsale"
+    transaction_id : Mapped[uuid.uuid4()] = mapped_column(ForeignKey("Sales.transaction_id"))
+    product_id : Mapped[uuid.uuid4()] = mapped_column(ForeignKey("Product.product_id"))
+    quantity : Mapped[int] = mapped_column(Integer)
+    price : Mapped[int] = mapped_column(Integer)
+
+    sales : Mapped["Sales"] = relationship(back_populates="Itemsale")
+
+
+
+
+
+#below is older pre orm database code
+
 
 class Database():
 
