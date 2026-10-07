@@ -1,10 +1,10 @@
 import sys
-from PySide6.QtCore import Qt, QSize, QMetaMethod
-from PySide6.QtWidgets import QApplication,QFileDialog, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QSizePolicy, QStackedWidget, QToolBar, QScrollArea,QLayout, QLineEdit, QFrame, QGridLayout,QHBoxLayout
-from PySide6.QtGui import QAction, QActionEvent, QPixmap, QImage
-from Scanning_data import scanner_reader
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QSizePolicy, QStackedWidget, \
+    QScrollArea, QFrame, QGridLayout,QHBoxLayout
+from PySide6.QtGui import QPixmap
+from Scanner.Scanning_data import scanner_reader
 
-import database
+from SRC.Database import database
 
 
 class SetupWizardWindow(QMainWindow):
@@ -29,7 +29,7 @@ class SetupWizardWindow(QMainWindow):
         Welcome_layout = QGridLayout(page)
         Welcome_layout.setHorizontalSpacing(0)
 
-        pixmap = QPixmap("logo.png")
+        pixmap = QPixmap("../logo.png")
         Logo = QLabel()
         Logo.setFixedSize(100,100)
         Logo.setScaledContents(True)
@@ -121,7 +121,7 @@ When your problems are endless, throw them in the ocean.""")
         self.book_Widget.setCurrentWidget(self.setup_database_sc2)
     def Inserting_UPC(self,nod,upc):
 
-        database.Adding_product_upc(nod,upc)
+        database.Adding_product_upc(nod, upc)
 
 
         pass

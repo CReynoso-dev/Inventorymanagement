@@ -40,7 +40,7 @@ class Customer(Base):
 
 class Product(Base):
     __tablename__ = "Product"
-    product_id : Mapped[Optional[uuid.UUID]] = mapped_column(primary_key=True,default=new_uuid)
+    product_id : Mapped[uuid.UUID] = mapped_column(primary_key=True,default=new_uuid)
     upc : Mapped[str] = mapped_column(String(12))
     name : Mapped[str] = mapped_column(String(80))
     quantity : Mapped[int] = mapped_column(Integer)

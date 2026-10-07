@@ -1,9 +1,9 @@
 import sys
 
-from gui import MainWindow,QApplication
-from database import Database
-from Service import Service
-from Repository import Repository
+from GUI.gui import MainWindow,QApplication
+from SRC.Database.database import Database
+from SRC.Service import Service
+from SRC.Repo.Repository import Repository
 
 def main():
     app = QApplication(sys.argv)

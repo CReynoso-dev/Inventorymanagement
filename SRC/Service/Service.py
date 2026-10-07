@@ -1,9 +1,3 @@
-from Repository import Repository
-import random
-from database import Database
-
-import typing
-
 class Service():
     def __init__(self,repository):
         #super().__init__(db_path)

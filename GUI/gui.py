@@ -1,11 +1,12 @@
 import sys
-from PySide6.QtCore import Qt, QSize, QMetaMethod
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QSizePolicy, QStackedWidget, QToolBar, QScrollArea,QLayout, QLineEdit, QFrame, QGridLayout,QHBoxLayout
-from PySide6.QtGui import QAction, QActionEvent
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QStackedWidget, QToolBar, QScrollArea,QLayout, QLineEdit, \
+    QGridLayout
+from PySide6.QtGui import QAction
 
-from database import Database
-from Service import Service
-from Repository import Repository
+from SRC.Database.database import Database
+from SRC.Service import Service
+from SRC.Repo.Repository import Repository
 
 
 
