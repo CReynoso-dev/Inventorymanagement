@@ -1,7 +1,7 @@
 import uuid
 
 from SRC.Database.database import Database
-from sqlalchemy import select
+from sqlalchemy import select,delete
 from SRC.Database.database import Customer,Product
 
 
@@ -54,7 +54,7 @@ class Repository():
 
 
     def Edit_customer_info(self, customer_id:str, name = None, number = None, email = None, timewith = None):
-        conn = db.Get_connection()
+        conn = self.db.Get_connection()
         sql = select(Customer).where(Customer.customer_id == uuid.UUID(customer_id))
         customer = conn.scalars(sql).one()
 
@@ -72,7 +72,7 @@ class Repository():
 
 
     def Edit_product_info(self,product_id : str,upc = None,name = None,quantity = None,description = None):
-        conn = db.Get_connection()
+        conn = self.db.Get_connection()
         sql = select(Product).where(Product.product_id == uuid.UUID(product_id))
         product = conn.scalars(sql).one()
         update_check = {"upc":upc,"name": name, "quantity": quantity, "description": description}
@@ -86,7 +86,16 @@ class Repository():
         conn.commit()
 
     def Delete_product_info(self,product_id: str):
-        pass
+        conn = self.db.Get_connection()
+        sql = delete(Product).where(Product.product_id == uuid.UUID(product_id))
+        conn.execute(sql)
+        conn.commit()
+
+    def Delete_customer_info(self,customer_id : str):
+        conn = self.db.Get_connection()
+        sql = sql = delete(Customer).where(Customer.customer_id == uuid.UUID(customer_id))
+        conn.execute(sql)
+        conn.commit()
 
 
 
@@ -99,17 +108,4 @@ class Repository():
 
 
 
-db = Database("sqlite", "../Database/store.db")
-repo = Repository(db)
-repo.Edit_product_info("5708b75b-6ab6-4dcf-9e31-c270c1650c1c",name="disdick",quantity=67)
-#repo.Add_product(upc=136771368,name="dish",quantity=4,price=1,description="heybro")
-#repo.Add_customer_info(name = "christian",number = "3478631934",email = "reynosoc634@gmail.com",timewith = 4)
-#cups = Product(name = "cups",upc = "232324242242",quantity = 99,price = 9,description = "hi")
-#conn.add_all([cups])
-#conn.commit()
 
-print(repo.Search_product("disdick"))
-
-#repo.Delete_customer_info("209388292")
-#repo.Edit_product_info(927383,name="pphead")
-#print(repo.Search_customer("kimari"))
