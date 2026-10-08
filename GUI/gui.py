@@ -179,7 +179,6 @@ class MainWindow(QMainWindow):
         text = self.add_new_cc.text()
         print(text.split(","))
 
-        database.add_customer_data("inventoryonhand.db",text)
 
     def Delete_cc_screen(self):
         page = QWidget()
@@ -300,9 +299,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    db = Database("superb.db")
-    repo = Repository(db)
-    serv = Service(repo)
-    window = MainWindow(serv)
+
+    window = MainWindow()
     window.show()
     sys.exit(app.exec())

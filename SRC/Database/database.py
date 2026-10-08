@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from sqlalchemy import create_engine,column,Integer,String,ForeignKey,text,Select
 from sqlalchemy.orm import sessionmaker,Session,mapped_column,Mapped,validates,relationship,DeclarativeBase
 from email_validator import validate_email,EmailNotValidError
+from pathlib import Path
 
 def new_uuid() -> uuid.UUID:
     # Note: Work around UUIDs with leading zeros: https://github.com/tiangolo/sqlmodel/issues/25
@@ -63,9 +64,9 @@ class Sales(Base):
 
     #sales : Mapped["Sales"] = relationship(back_populates="itemsale")
 
-databaseurl = "sqlite:///store.db"
-engine = create_engine(databaseurl,connect_args={"check_same_thread":False})
-sessionlocal = sessionmaker(autocommit=False,autoflush=False,bind=engine)
+#databaseurl = "sqlite:///store.db"
+#engine = create_engine(databaseurl,connect_args={"check_same_thread":False})
+#sessionlocal = sessionmaker(autocommit=False,autoflush=False,bind=engine)
 
 
 
@@ -73,20 +74,22 @@ sessionlocal = sessionmaker(autocommit=False,autoflush=False,bind=engine)
 
 
 class Database():
-
     def __init__(self,sql,db_path):
+
         self.sql = sql
         self.db_path = db_path
         self.db_url = f"{sql}:///{db_path}"
 
         self.engine = create_engine(self.db_url,connect_args={"check_same_thread":False})
 
-        self.session = sessionmaker(autocommit=False,autoflush=False,bind=engine)
+        self.session = sessionmaker(autocommit=False,autoflush=False,bind=self.engine)
 
         #self.cursor = Session(self.engine)
 
 
         self.Create_Tables()
+
+
     def Create_Tables(self):
         Base.metadata.create_all(self.engine)
 
@@ -100,7 +103,7 @@ class Database():
 
 
 #print(uuid.uuid4())
-#IX = Database("superb.db")
+#IX = Database("sqlite","superb.db")
 #IX.Edit_customer_info(5165762675376,number="646-3546-5679")
 #IX.Insert_Data("Product","upc,Name,Quantity",(996357,"dick",99))
 #startup_table()

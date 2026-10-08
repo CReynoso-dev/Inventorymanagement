@@ -30,8 +30,3 @@ class Service():
     def Edit_item_info(self):
         pass
 
-#db = Database("superb.db")
-#repo = Repository(db)
-#serv = Service(repo)
-#print(serv.Lookup_product("cups"))
-
