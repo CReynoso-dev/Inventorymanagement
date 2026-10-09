@@ -105,5 +105,4 @@ class Database():
 #print(uuid.uuid4())
 #IX = Database("sqlite","superb.db")
 #IX.Edit_customer_info(5165762675376,number="646-3546-5679")
-#IX.Insert_Data("Product","upc,Name,Quantity",(996357,"dick",99))
 #startup_table()
