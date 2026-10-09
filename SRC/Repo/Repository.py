@@ -71,11 +71,11 @@ class Repository():
         conn.commit()
 
 
-    def Edit_product_info(self,product_id : str,upc = None,name = None,quantity = None,description = None):
+    def Edit_product_info(self,product_id : str,upc = None,name = None,quantity = None,price = None,description = None):
         conn = self.db.Get_connection()
         sql = select(Product).where(Product.product_id == uuid.UUID(product_id))
         product = conn.scalars(sql).one()
-        update_check = {"upc":upc,"name": name, "quantity": quantity, "description": description}
+        update_check = {"upc":upc,"name": name, "quantity": quantity,"price":price, "description": description}
         confirmed_updates = {}
 
         for key, value in update_check.items():

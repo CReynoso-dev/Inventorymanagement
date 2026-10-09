@@ -1,5 +1,6 @@
+from SRC.Repo.Repository import Repository
 class Service():
-    def __init__(self,repository):
+    def __init__(self,repository : Repository ):
         #super().__init__(db_path)
         self.repo = repository
 
