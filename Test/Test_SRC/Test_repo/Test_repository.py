@@ -2,7 +2,7 @@ from SRC.Repo.Repository import Repository
 from SRC.Database.database import Database
 from SRC.Service.Service import Service
 
-db_test = Database("sqlite","ABSOLUTE PATH HERE ")
+db_test = Database("sqlite","ABSOLUTE PATH HERE")
 repo = Repository(db_test)
 serv = Service(repo)
 print(repo.Search_product("cups"))

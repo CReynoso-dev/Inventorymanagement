@@ -9,7 +9,7 @@ from SRC.Service import Service
 from SRC.Repo.Repository import Repository
 
 
-
+#maybe recycled into a client side gui
 
 class MainWindow(QMainWindow):
     def __init__(self,serv):

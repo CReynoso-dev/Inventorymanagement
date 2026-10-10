@@ -36,7 +36,7 @@ class Repository():
 
     def Add_product(self, upc, name, quantity,price, description):
         with self.db.Get_connection() as conn:
-            name = Product(upc= upc ,name= name,quantity = quantity,price = price,description = description)
+            name = Product(upc = upc ,name = name ,quantity = quantity, price = price, description = description)
             conn.add(name)
             conn.commit()
 
@@ -53,41 +53,36 @@ class Repository():
 
 
 
-    def Edit_customer_info(self, customer_id:str, name = None, number = None, email = None, timewith = None):
+    def Edit_customer_info(self, customer_id : uuid.UUID , confirmed_updates : dict):
         conn = self.db.Get_connection()
-        sql = select(Customer).where(Customer.customer_id == uuid.UUID(customer_id))
-        customer = conn.scalars(sql).one()
-
-        update_check = {"name":name,"number":number,"email":email,"timewith":timewith}
-        confirmed_updates = {}
-
-        for key,value in update_check.items():
-            if value is not None:
-                confirmed_updates[key] = value
-        print(confirmed_updates)
+        customer = self.Get_Customer(customer_id,conn)
         for columns,data in confirmed_updates.items():
             setattr(customer,columns,data)
 
         conn.commit()
 
+    def Get_product(self,product_id,conn):
 
-    def Edit_product_info(self,product_id : str,upc = None,name = None,quantity = None,price = None,description = None):
-        conn = self.db.Get_connection()
-        sql = select(Product).where(Product.product_id == uuid.UUID(product_id))
+        sql = select(Product).where(Product.product_id == product_id)
         product = conn.scalars(sql).one()
-        update_check = {"upc":upc,"name": name, "quantity": quantity,"price":price, "description": description}
-        confirmed_updates = {}
+        return product
+    def Get_Customer(self,customer_id,conn):
+        sql = select(Customer).where(Customer.customer_id == customer_id)
+        customer = conn.scalars(sql).one()
+        return customer
 
-        for key, value in update_check.items():
-            if value is not None:
-                confirmed_updates[key] = value
+    def Edit_product_info(self,product_id : uuid.UUID,confirmed_updates : dict):
+        conn = self.db.Get_connection()
+
+        product = self.Get_product(product_id,conn)
+
         for column, value in confirmed_updates.items():
             setattr(product,column,value)
         conn.commit()
 
-    def Delete_product_info(self,product_id: str):
+    def Delete_product_info(self,product_id: uuid.UUID):
         conn = self.db.Get_connection()
-        sql = delete(Product).where(Product.product_id == uuid.UUID(product_id))
+        sql = delete(Product).where(Product.product_id == product_id)
         conn.execute(sql)
         conn.commit()
 
