@@ -8,14 +8,14 @@ repo = Repository(db_test)
 serv = Service(repo)
 
 def test_create_customer_info_success():
-    randomname = 'H'.join(random.choices(string.ascii_letters + string.ascii_uppercase,k=9))
+    randomname = 'H' + "".join(random.choices(string.ascii_letters + string.ascii_uppercase,k=9))
     repo.Add_customer_info(name=randomname,number="1234567890",email="test@gmail.com",timewith=50)
     createdrow = repo.Search_customer(randomname)
     assert createdrow[0][1] == randomname
 
 
 def test_create_product_info_success():
-    randomname = 'H'.join(random.choices(string.ascii_letters + string.ascii_uppercase,k=9))
+    randomname = "H" + ''.join(random.choices(string.ascii_letters + string.ascii_uppercase,k=9))
     randomupc = ''.join(random.choices(string.digits,k=12))
     repo.Add_product(upc=randomupc,name=randomname,quantity=99,price=8,description="brown cups")
     createdrow = repo.Search_product(randomname)
@@ -24,31 +24,25 @@ def test_create_product_info_success():
 
 
 def test_Delete_customer_info_success():
-    while True:
-        if (len(customer:= repo.Search_customer(''.join(random.choices(string.ascii_letters))))) > 0:
-            customer_id = customer[0][0]
-            name = customer[0][1]
+    customer = repo.Search_customer('H')
+    customer_id = customer[0][0]
+    name = customer[0][2]
 
-            repo.Delete_customer_info(customer_id)
 
-            assert len(repo.Search_customer(name)) == 0
-            break
-        else:
-            continue
+
+    repo.Delete_customer_info(customer_id)
+
+    assert len(repo.Search_customer(name)) == 0
+
+
 
 
 def test_Delete_product_info_success():
-    while True:
-        if (len(product:= repo.Search_product(''.join(random.choices(string.ascii_letters))))) > 0:
-            product_id = product[0][0]
-            name = product[0][2]
-
-            repo.Delete_product_info(product_id)
-
-            assert len(repo.Search_product(name)) == 0
-            break
-        else:
-            continue
+    product = repo.Search_product('H')
+    product_id = product[0][0]
+    name = product[0][2]
+    repo.Delete_product_info(product_id)
+    assert len(repo.Search_product(name)) == 0
 
 def test_Edit_customer_info_success():
     search_result = repo.Search_customer("testdata")
