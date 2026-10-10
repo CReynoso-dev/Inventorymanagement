@@ -46,9 +46,9 @@ class Service():
         else:
             raise TypeError("Product_id is wrong type must be a String")
 
-    def Delete_customer(self,customer_id):
+    def Delete_customer(self,customer_id: str):
         if type(customer_id) == str:
-            self.repo.Delete_product_info(product_id=uuid.UUID(customer_id))
+            self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id))
         else:
             raise TypeError("customer_id is wrong type must be a String")
     def Edit_item_info(self,item_id,upc = None,name = None,quantity = None,price = None,description = None):

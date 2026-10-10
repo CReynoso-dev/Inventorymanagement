@@ -12,7 +12,7 @@ class Repository():
 
     def Search_product(self, search):
         with self.db.Get_connection() as conn:
-            sql = select(Product).where(Product.name.in_([search]))
+            sql = select(Product).where(Product.name.like(f"{search}%"))
             result = []
             for product in conn.scalars(sql):
                 result.append((product.product_id,product.upc,product.name,product.price,product.quantity,product.description))
@@ -26,7 +26,7 @@ class Repository():
 
     def Search_customer(self, search):
         with self.db.Get_connection() as conn:
-            sql = select(Customer).where(Customer.name.in_([search]))
+            sql = select(Customer).where(Customer.name.like(f"{search}%"))
             result = []
             for customer in conn.scalars(sql):
                 result.append((customer.customer_id, customer.name, customer.number, customer.email,
@@ -86,9 +86,9 @@ class Repository():
         conn.execute(sql)
         conn.commit()
 
-    def Delete_customer_info(self,customer_id : str):
+    def Delete_customer_info(self,customer_id : uuid.UUID):
         conn = self.db.Get_connection()
-        sql = sql = delete(Customer).where(Customer.customer_id == uuid.UUID(customer_id))
+        sql = sql = delete(Customer).where(Customer.customer_id == customer_id)
         conn.execute(sql)
         conn.commit()
 

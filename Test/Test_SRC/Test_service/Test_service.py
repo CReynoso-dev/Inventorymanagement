@@ -1,14 +1,19 @@
 from SRC.Service.Service import Service
 from SRC.Database.database import Database
 from SRC.Repo.Repository import Repository
+import pytest
+
+
+
 
 
 db_test = Database(sql="sqlite",db_path="/Users/fuckdouglass/Desktop/Inventorymanagement/SRC/Database/store.db")
 repo_test = Repository(db=db_test)
 service_test = Service(repository=repo_test)
-
-print(service_test.Lookup_product("mug"))
-print(service_test.Lookup_customer("kimari"))
+def test_lookup_c_with_result():
+    assert len(service_test.Lookup_customer("christian")) > 0
+#print(service_test.Lookup_product("mug"))
+#print(service_test.Lookup_customer("kimari"))
 #service_test.Add_item(upc=63546345,name="mug",quantity=45,price=8,description="whitemug")
 #service_test.Add_customer("christian","3478631934","reynosoc634@gmail.com",54)
 #service_test.Edit_item_info(item_id = "f754de70-5b03-427b-839c-c52f5379060b",name="iggy",quantity=9)
