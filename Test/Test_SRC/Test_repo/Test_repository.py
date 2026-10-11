@@ -26,7 +26,7 @@ def test_create_product_info_success():
 def test_Delete_customer_info_success():
     customer = repo.Search_customer('H')
     customer_id = customer[0][0]
-    name = customer[0][2]
+    name = customer[0][1]
 
 
 
