@@ -43,7 +43,7 @@ def test_Delete_product_info_success():
     name = product[0][2]
     repo.Delete_product_info(product_id)
     assert len(repo.Search_product(name)) == 0
-
+#still have to finish creating test for edits
 def test_Edit_customer_info_success():
     search_result = repo.Search_customer("testdata")
     repo.Edit_customer_info(customer_id=search_result[0][0],confirmed_updates={"name":"testdata_edited"})
