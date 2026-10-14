@@ -74,10 +74,12 @@ class Sales(Base):
 
 
 class Database():
-    def __init__(self,sql,db_path):
+    def __init__(self,sql,db_name):
 
         self.sql = sql
-        self.db_path = db_path
+        self.db_name = db_name
+        base_dir = Path(__file__).resolve().parent
+        db_path = base_dir / self.db_name
         self.db_url = f"{sql}:///{db_path}"
 
         self.engine = create_engine(self.db_url,connect_args={"check_same_thread":False})

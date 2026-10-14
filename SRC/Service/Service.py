@@ -23,8 +23,8 @@ class Service():
             raise TypeError(f"Named lookup only input must be String. Current input:{type(name)}")
 
         return customers
-    def Add_item(self,upc : int,name : str,quantity : int,price : int,description : str):
-        approved = { upc : int,name : str,quantity : int,price : int,description : str}
+    def Add_item(self,upc : str,name : str,quantity : int,price : int,description : str):
+        approved = { upc : str,name : str,quantity : int,price : int,description : str}
         for arg,types in approved.items():
             if type(arg) == types:
                 continue
@@ -51,7 +51,7 @@ class Service():
             self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id))
         else:
             raise TypeError("customer_id is wrong type must be a String")
-    def Edit_item_info(self,item_id,upc = None,name = None,quantity = None,price = None,description = None):
+    def Edit_item_info(self,item_id = str,upc = None,name = None,quantity = None,price = None,description = None):
         update_check = {"upc": upc, "name": name, "quantity": quantity, "price": price, "description": description}
         confirmed_updates = {}
         item_iduuid = uuid.UUID(item_id)

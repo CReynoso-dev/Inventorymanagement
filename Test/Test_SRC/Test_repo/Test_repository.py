@@ -24,7 +24,8 @@ def test_create_product_info_success():
 
 
 def test_Delete_customer_info_success():
-    customer = repo.Search_customer('H')
+    repo.Add_customer_info(name="testyzesty",number="123-456-7890",email = "howdoicode@gmail.com",timewith=33)
+    customer = repo.Search_customer('testyzesty')
     customer_id = customer[0][0]
     name = customer[0][1]
 
@@ -38,7 +39,8 @@ def test_Delete_customer_info_success():
 
 
 def test_Delete_product_info_success():
-    product = repo.Search_product('H')
+    repo.Add_product(upc="123321123321",name="testyproduct",quantity=99,price=800,description="magical product can grant you a entry level swe job instantly")
+    product = repo.Search_product('testyproduct')
     product_id = product[0][0]
     name = product[0][2]
     repo.Delete_product_info(product_id)
