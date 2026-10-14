@@ -3,31 +3,42 @@ from SRC.Database.database import Database
 from SRC.Service.Service import Service
 import random
 import string
-db_test = Database("sqlite","/Users/fuckdouglass/Desktop/Inventorymanagement/Test/Test_SRC/Test_database/test.db")
+db_test = Database("sqlite","testrepo")
 repo = Repository(db_test)
 serv = Service(repo)
 
 def test_create_customer_info_success():
-    randomname = 'H' + "".join(random.choices(string.ascii_letters + string.ascii_uppercase,k=9))
-    repo.Add_customer_info(name=randomname,number="1234567890",email="test@gmail.com",timewith=50)
-    createdrow = repo.Search_customer(randomname)
-    assert createdrow[0][1] == randomname
+
+    name = 'customer_test_create' + "".join(random.choices(string.ascii_letters,k=9))
+    number = "347" + "".join(random.choices(string.digits, k=7))
+    email = "".join(random.choices(string.ascii_letters + string.ascii_uppercase)) + "@gmail.com"
+    timewith = random.randint(1, 99)
+    repo.Add_customer_info(name=name,number=number,email=email,timewith=timewith)
+    createdrow = repo.Search_customer(name)
+    assert createdrow[0][1] == name
 
 
 def test_create_product_info_success():
-    randomname = "H" + ''.join(random.choices(string.ascii_letters + string.ascii_uppercase,k=9))
-    randomupc = ''.join(random.choices(string.digits,k=12))
-    repo.Add_product(upc=randomupc,name=randomname,quantity=99,price=8,description="brown cups")
-    createdrow = repo.Search_product(randomname)
-    assert createdrow[0][2] == randomname
+    upc = ''.join(random.choices(string.digits, k=12))
+    name = "product_test_create" + ''.join(random.choices(string.ascii_letters,k=9))
+    quantity = random.randint(1,99)
+    price = random.randint(1,1000)
+    description = "THIS DESCRIPTION WAS WRITTEN EXCLUSIVLY BY CHATGPT:white cup"
+    repo.Add_product(upc=upc,name=name,quantity=quantity,price=price,description=description)
+    createdrow = repo.Search_product(name)
+    assert createdrow[0][2] == name
 
 
 
 def test_Delete_customer_info_success():
-    repo.Add_customer_info(name="testyzesty",number="123-456-7890",email = "howdoicode@gmail.com",timewith=33)
-    customer = repo.Search_customer('testyzesty')
-    customer_id = customer[0][0]
-    name = customer[0][1]
+    name = 'customer_test_delete' + "".join(random.choices(string.ascii_letters,k=9))
+    number = "347" + "".join(random.choices(string.digits, k=7))
+    email = "".join(random.choices(string.ascii_letters + string.ascii_uppercase)) + "@gmail.com"
+    timewith = random.randint(1, 99)
+    repo.Add_customer_info(name=name,number=number,email = email,timewith=timewith)
+    results = repo.Search_customer(name)
+    customer_id = results[0][0]
+    name = results[0][1]
 
 
 
@@ -39,20 +50,42 @@ def test_Delete_customer_info_success():
 
 
 def test_Delete_product_info_success():
-    repo.Add_product(upc="123321123321",name="testyproduct",quantity=99,price=800,description="magical product can grant you a entry level swe job instantly")
-    product = repo.Search_product('testyproduct')
-    product_id = product[0][0]
-    name = product[0][2]
+    upc = ''.join(random.choices(string.digits, k=12))
+    name = "product_test_delete" + ''.join(random.choices(string.ascii_letters, k=9))
+    quantity = random.randint(1, 99)
+    price = random.randint(1, 1000)
+    description = "magical product can grant you a entry level swe job instantly"
+    repo.Add_product(upc=upc,name=name,quantity=quantity,price=price,description=description)
+    results = repo.Search_product(name)
+    product_id = results[0][0]
+    name = results[0][2]
     repo.Delete_product_info(product_id)
     assert len(repo.Search_product(name)) == 0
 #still have to finish creating test for edits
 def test_Edit_customer_info_success():
-    search_result = repo.Search_customer("testdata")
-    repo.Edit_customer_info(customer_id=search_result[0][0],confirmed_updates={"name":"testdata_edited"})
+    name = 'customer_test_before_edit' + "".join(random.choices(string.ascii_letters, k=9))
+    number = "347" + "".join(random.choices(string.digits, k=7))
+    email = "".join(random.choices(string.ascii_letters + string.ascii_uppercase)) + "@gmail.com"
+    timewith = random.randint(1, 99)
+    repo.Add_customer_info(name=name, number=number, email=email, timewith=timewith)
+    results = repo.Search_customer(name)
+    edited_name = "test_after_edit" + "".join(random.choices(string.ascii_letters,k=9))
+    repo.Edit_customer_info(customer_id=results[0][0],confirmed_updates={"name":f"{edited_name}"})
+    edited_results = repo.Search_customer(edited_name)
+    assert edited_results[0][1] == edited_name
 
-    repo.Edit_customer_info(customer_id=search_result[0][0],confirmed_updates={"name":"testdata"})
 
 def test_Edit_product_info_success():
-    search_result = repo.Search_product("cups")
-    repo.Edit_product_info(product_id=search_result[0][0],confirmed_updates={"name":"cups_edited"})
-    repo.Edit_product_info(product_id=search_result[0][0],confirmed_updates={"name":"cups"})
+    upc = ''.join(random.choices(string.digits, k=12))
+    name = "product_test_before_edit" + ''.join(random.choices(string.ascii_letters, k=9))
+    quantity = random.randint(1, 99)
+    price = random.randint(1, 1000)
+    description = "magical product can grant you a entry level swe job instantly"
+    repo.Add_product(upc=upc, name=name, quantity=quantity, price=price,
+                     description=description)
+    results = repo.Search_product(name)
+    edited_name = "product_test_after_edit" + "".join(random.choices(string.ascii_letters,k=9))
+
+    repo.Edit_product_info(product_id=results[0][0],confirmed_updates={"name":f"{edited_name}"})
+    edited_results = repo.Search_product(edited_name)
+    assert edited_results[0][2] == edited_name

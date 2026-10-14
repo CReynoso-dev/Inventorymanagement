@@ -4,7 +4,7 @@ import string
 from SRC.Service.Service import Service
 from SRC.Database.database import Database
 from SRC.Repo.Repository import Repository
-import pytest
+
 db = Database(db_name="servtest",sql="sqlite")
 repo = Repository(db)
 serv = Service(repo)
