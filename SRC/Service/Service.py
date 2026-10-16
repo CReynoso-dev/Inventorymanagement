@@ -74,7 +74,11 @@ class Service():
         update_check = {"name": name, "number": number, "email": email, "timewith": timewith}
         approved_types = {name:str,number:str,self._Email_checker("email",email):str,timewith:int}
         confirmed_updates = {}
-        customer_iduuid =uuid.UUID(customer_id)
+        if type(customer_id) == str:
+
+            customer_iduuid =uuid.UUID(customer_id)
+        else:
+            raise TypeError("customer_id must be str")
         for key,value in update_check.items():
             if type(value) != approved_types[value]:
                 raise TypeError("incorrect type for edited column")
