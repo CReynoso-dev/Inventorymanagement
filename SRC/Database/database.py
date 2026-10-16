@@ -1,7 +1,7 @@
 import uuid
 from typing import List,Optional
 from contextlib import contextmanager
-from sqlalchemy import create_engine,column,Integer,String,ForeignKey,text,Select
+from sqlalchemy import create_engine,column,Integer,String,ForeignKey,text,Select,CheckConstraint
 from sqlalchemy.orm import sessionmaker,Session,mapped_column,Mapped,validates,relationship,DeclarativeBase
 from email_validator import validate_email,EmailNotValidError
 from pathlib import Path
@@ -37,7 +37,7 @@ class Customer(Base):
 
             return email_info.normalized
         except EmailNotValidError as error:
-            return print(f"Email invalid: {error}")
+            raise EmailNotValidError
 
 class Product(Base):
     __tablename__ = "Product"
