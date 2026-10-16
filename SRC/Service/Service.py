@@ -1,5 +1,5 @@
 import uuid
-
+from SRC.Database.database import validates,validate_email,EmailNotValidError
 from SRC.Repo.Repository import Repository
 
 
@@ -8,6 +8,17 @@ class Service():
         #super().__init__(db_path)
         self.repo = repository
 #lookup methods are only for name currently must add different types of lookups
+    #using the sqlalchemy validator decorator to make a standard validator for email on database edits
+    @validates("email")
+    def _Email_checker(self, key, address):
+        if not address:
+            raise ValueError("No email detected")
+        try:
+            email_info = validate_email(address, check_deliverability=False)
+
+            return email_info.normalized
+        except EmailNotValidError as error:
+            raise EmailNotValidError
     def Lookup_product(self,name : str):
         if type(name) == str:
             products = self.repo.Search_product(name)
@@ -51,7 +62,7 @@ class Service():
             self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id))
         else:
             raise TypeError("customer_id is wrong type must be a String")
-    def Edit_item_info(self,item_id = str,upc = None,name = None,quantity = None,price = None,description = None):
+    def Edit_item_info(self,item_id : str,upc = None,name = None,quantity = None,price = None,description = None):
         update_check = {"upc": upc, "name": name, "quantity": quantity, "price": price, "description": description}
         confirmed_updates = {}
         item_iduuid = uuid.UUID(item_id)
@@ -61,9 +72,12 @@ class Service():
         self.repo.Edit_product_info(item_iduuid,confirmed_updates)
     def Edit_customer_info(self,customer_id: str , name = None, number = None, email = None, timewith = None):
         update_check = {"name": name, "number": number, "email": email, "timewith": timewith}
+        approved_types = {name:str,number:str,self._Email_checker("email",email):str,timewith:int}
         confirmed_updates = {}
         customer_iduuid =uuid.UUID(customer_id)
         for key,value in update_check.items():
+            if type(value) != approved_types[value]:
+                raise TypeError("incorrect type for edited column")
             if value is not None:
                 confirmed_updates[key] = value
 
