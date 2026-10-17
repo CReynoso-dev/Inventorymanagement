@@ -84,7 +84,7 @@ class MainWindow(QMainWindow):
     def Customer_contact_screen(self):
         page = QWidget()
         self.layout_cc = QVBoxLayout(page)
-        datatest = QLabel("fuckyou\nh\nhey\nhey\nhey")
+        datatest = QLabel("test")
 
 
         self.cc_toolbar = QToolBar("customer Contact",allowedAreas=Qt.ToolBarArea.TopToolBarArea)

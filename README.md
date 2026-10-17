@@ -1,11 +1,11 @@
-# Inventory Management System
+# Inventory Management
 
 A backend-focused inventory management application designed to help small businesses track inventory, customers, and sales while remaining simple enough for users with limited technical experience.
 
 The project is being developed as a REST API using Python, FastAPI, SQLAlchemy, and SQLite. A PySide6 desktop interface is also included as an unfinished client-side prototype and may later be connected to the API.
 
 > **Project Status:** Active Development  
-> The SQLAlchemy data layer and repository architecture are currently being developed and refactored. FastAPI integration is in progress.
+> Product and customer CRUD operations are implemented in the SQLAlchemy repository and service layers, with basic automated tests. FastAPI integration is at the initial scaffolding stage; API CRUD endpoints are not implemented yet.
 
 ---
 
@@ -37,7 +37,7 @@ The application currently uses SQLAlchemy ORM models for managing core business 
 - Sales
 - Relationships between customers and their sales
 
-UUIDs are used as primary identifiers for database records.
+UUIDs are used as primary identifiers for database records. The customer-to-sales relationship is defined in the ORM and backed by a foreign key. Sales processing, sale line items, and inventory updates through sales are still planned.
 
 ### Repository Layer
 
@@ -51,27 +51,39 @@ Current repository functionality includes:
 - Searching for customers
 - Editing product information
 - Editing customer information
+- Deleting products
+- Deleting customers
 
-Additional CRUD functionality is currently being implemented.
+Basic product and customer CRUD operations are implemented. Name searches use prefix matching, while edits and deletions identify records by UUID. Error handling and edge cases are still being improved.
 
 ### Service Layer
 
 The service layer sits between the application interface and repository layer.
 
-Its purpose is to handle:
+Current service functionality includes:
 
-- Business rules
-- Input validation
-- Coordination between repository operations
-- Application-level logic
+- Product and customer creation, lookup, editing, and deletion through the repository
+- Basic input type checks for creation, lookup, and deletion methods
+- Conversion of string identifiers to UUIDs for edits and deletions
+- Building partial updates from edit fields whose values are not `None`
 
-This keeps business logic separate from direct database access.
+Database and repository instances are passed through constructors using dependency injection. This keeps service logic separate from direct database access. Validation, error handling, and session lifecycle management still need further work.
+
+### Automated Tests
+
+The repository includes 12 basic pytest tests across the repository and service layers:
+
+- Product and customer creation, checked through name lookups
+- Product and customer editing, checked through updated names
+- Product and customer deletion, checked by confirming searches return no matching records
+
+Each CRUD test creates its own sample records. A separate database initialization smoke test is also included. The tests currently use file-backed SQLite databases. Failure-case tests and database cleanup are not implemented yet.
 
 ### FastAPI REST API
 
-**Status: In Progress**
+**Status: Initial Scaffolding / In Progress**
 
-FastAPI is being integrated as the primary interface to the backend.
+FastAPI is being introduced as the primary interface to the backend. The repository currently contains a starter FastAPI app and a placeholder route; the API is not yet connected to the service layer, and CRUD endpoints are not implemented.
 
 Planned API functionality includes endpoints for:
 
@@ -99,7 +111,7 @@ The project also contains early barcode-scanner functionality intended to suppor
 
 ## Architecture
 
-The backend is being organized using a layered architecture:
+The database, repository, and service layers are implemented. The intended full architecture adds FastAPI and client applications around those layers:
 
 ```text
 Client
@@ -122,8 +134,8 @@ Database
 
 Each layer has a separate responsibility:
 
-**API Layer**  
-Receives HTTP requests and returns responses.
+**API Layer — Planned Integration**  
+Will receive HTTP requests, call the service layer, and return responses.
 
 **Service Layer**  
 Handles application logic, validation, and business rules.
@@ -141,10 +153,11 @@ This separation allows individual parts of the application to change without req
 ## Technology Stack
 
 - **Python**
-- **FastAPI** — REST API development
+- **FastAPI** — Initial API scaffolding; CRUD endpoints planned
 - **SQLAlchemy** — ORM and database interaction
 - **SQLite** — Current development database
-- **Pydantic** — API request and response validation
+- **Pydantic** — Planned API request and response models
+- **pytest** — Basic repository, service, and database tests
 - **PySide6** — Desktop client prototype
 - **UUID** — Record identifiers
 - **Git / GitHub** — Version control
@@ -173,12 +186,18 @@ Inventorymanagement/
 │   └── Unfinished PySide6 client prototype
 │
 ├── Scanner/
-│   └── Barcode scanner functionality
+│   └── Early barcode scanner functionality
+│
+├── Test/
+│   └── Test_SRC/
+│       ├── Test_database/
+│       ├── Test_repo/
+│       └── Test_service/
 │
 └── README.md
 ```
 
-The structure is continuing to evolve as the backend is refactored around FastAPI and SQLAlchemy.
+The structure is continuing to evolve as automated testing is expanded and FastAPI is connected to the existing backend layers.
 
 ---
 
@@ -191,9 +210,12 @@ Planned development includes:
 - [x] SQLAlchemy ORM integration
 - [x] UUID-based database identifiers
 - [x] Initial model relationships
-- [ ] Complete repository CRUD operations
-- [ ] Add automated repository and service tests
-- [ ] Complete service-layer refactor
+- [x] Implement basic product and customer repository CRUD operations
+- [x] Add basic automated repository and service CRUD tests
+- [x] Refactor the product and customer service layer to use the repository
+- [ ] Add failure-case and edge-case tests
+- [ ] Improve test isolation, cleanup, and default test discovery
+- [ ] Refine database session lifecycle and transaction handling
 - [ ] Add Pydantic request and response models
 - [ ] Build FastAPI CRUD endpoints
 - [ ] Implement sales and sale-line-item functionality
@@ -231,6 +253,7 @@ Through the project, I am developing practical experience with:
 - Application architecture
 - Refactoring an existing codebase
 - Git-based iterative development
+- Automated testing with pytest and assertions
 
 One of the main goals of the project is not only to build working functionality, but to continually improve the architecture as I learn more about backend software engineering.
 
@@ -238,20 +261,22 @@ One of the main goals of the project is not only to build working functionality,
 
 ## Current Development Focus
 
-The current development focus is completing the transition from the application's original database implementation to SQLAlchemy.
+The SQLAlchemy models, basic product and customer repository operations, service methods, and initial CRUD tests are in place. The current focus is strengthening validation and tests before connecting the backend to FastAPI.
 
-The immediate development sequence is:
+The development sequence is:
 
 ```text
-SQLAlchemy Models
+SQLAlchemy Models — Implemented
         ↓
-Repository CRUD
+Product and Customer Repository CRUD — Implemented
         ↓
-Service Layer
+Product and Customer Service Layer — Implemented
         ↓
-Automated Tests
+Basic Automated CRUD Tests — Added
         ↓
-FastAPI Endpoints
+Failure-Case Tests and Validation — Next
+        ↓
+FastAPI CRUD Endpoints — Planned
 ```
 
 Once the backend layers are stable, FastAPI will become the primary entry point into the application.
