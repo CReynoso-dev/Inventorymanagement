@@ -28,10 +28,9 @@ class Repository():
     def Search_customer(self, search):
         with self.db.Get_connection() as conn:
             sql = select(Customer).where(Customer.name.like(f"{search}%"))
-            result = []
+
             for customer in conn.scalars(sql):
-                result.append((customer.customer_id, customer.name, customer.number, customer.email,
-                               customer.timewith))
+                result = {"customer_id":customer.customer_id,"name":customer.name,"number":customer.number,"email":customer.email,"timewith":customer.timewith}
 
         return result
 
