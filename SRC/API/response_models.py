@@ -8,3 +8,10 @@ class Customer(BaseModel):
     number : str
     email : str
     timewith : int
+class Product(BaseModel):
+    product_id : uuid.UUID
+    upc : str
+    name : str
+    quantity : int
+    price : int
+    description : str
