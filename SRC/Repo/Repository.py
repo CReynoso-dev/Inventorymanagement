@@ -13,10 +13,9 @@ class Repository():
     def Search_product(self, search):
         with self.db.Get_connection() as conn:
             sql = select(Product).where(Product.name.like(f"{search}%"))
-            result = []
             for product in conn.scalars(sql):
-                result.append((product.product_id,product.upc,product.name,product.price,product.quantity,
-                               product.description))
+                result = {"product_id":product.product_id,"upc":product.upc,"name":product.name,"price":product.price,"quantity":product.quantity,"description":
+                               product.description}
 
         return result
 
