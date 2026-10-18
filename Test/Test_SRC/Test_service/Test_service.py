@@ -23,6 +23,7 @@ def test_add_item_success():
 
 
 
+
 def test_add_customer_success():
     name = "mr.testymctesterson" + "".join(random.choices(string.ascii_lowercase ,k=11))
     number = "347" + "".join(random.choices(string.digits,k=7))
