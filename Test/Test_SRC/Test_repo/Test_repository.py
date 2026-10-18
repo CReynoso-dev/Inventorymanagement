@@ -54,7 +54,7 @@ def test_Delete_product_info_success():
     name = "product_test_delete" + ''.join(random.choices(string.ascii_letters, k=9))
     quantity = random.randint(1, 99)
     price = random.randint(1, 1000)
-    description = "magical product can grant you a entry level swe job instantly"
+    description = "test description: test test test"
     repo.Add_product(upc=upc,name=name,quantity=quantity,price=price,description=description)
     results = repo.Search_product(name)
     product_id = results[0][0]
@@ -80,7 +80,7 @@ def test_Edit_product_info_success():
     name = "product_test_before_edit" + ''.join(random.choices(string.ascii_letters, k=9))
     quantity = random.randint(1, 99)
     price = random.randint(1, 1000)
-    description = "magical product can grant you a entry level swe job instantly"
+    description = "test decription: test test test"
     repo.Add_product(upc=upc, name=name, quantity=quantity, price=price,
                      description=description)
     results = repo.Search_product(name)
