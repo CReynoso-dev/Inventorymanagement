@@ -27,7 +27,7 @@ class Service():
 
         return products
 
-    def Lookup_customer(self,name):
+    def Lookup_customer(self,name : str):
         if type(name) == str:
             customers = self.repo.Search_customer(name)
         else:
