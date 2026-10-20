@@ -12,12 +12,10 @@ class Repository():
 
     def Search_product(self, search):
         with self.db.Get_connection() as conn:
-            sql = select(Product).where(Product.name.like(f"{search}%"))
-            for product in conn.scalars(sql):
-                result = {"product_id":product.product_id,"upc":product.upc,"name":product.name,"price":product.price,"quantity":product.quantity,"description":
-                               product.description}
 
-        return result
+            product = conn.query(Product).filter(Product.name.like(f"{search}%")).all()
+
+        return product
 
 
 
@@ -26,12 +24,9 @@ class Repository():
 
     def Search_customer(self, search):
         with self.db.Get_connection() as conn:
-            sql = select(Customer).where(Customer.name.like(f"{search}%"))
+            customer = conn.query(Customer).filter(Customer.name.like(f"{search}%")).all()
 
-            for customer in conn.scalars(sql):
-                result = {"customer_id":customer.customer_id,"name":customer.name,"number":customer.number,"email":customer.email,"timewith":customer.timewith}
-
-        return result
+        return customer
 
     def Add_product(self, upc, name, quantity,price, description):
         with self.db.Get_connection() as conn:
