@@ -18,15 +18,21 @@ def get_service(repo = Depends(get_repo)):
 
 @app.post("/customer/")
 def Add_customer(customer: CustomerCreate, service: Annotated[Service, Depends(get_service)]):
-
+    #need to improve error catching
     try:
         service.Add_customer(name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
         return True
     except:
-        raise HTTPException(400)
+        raise HTTPException(400,"Invalid request to add customer")
 
-
-
+@app.post("/item/")
+def Add_item(item : ProductCreate, service: Annotated[Service, Depends(get_service)]):
+    #need to improve error catching
+    try:
+        service.Add_item(upc=item.upc,name=item.name,quantity=item.quantity,price=item.price,description=item.description)
+        return True
+    except:
+        raise HTTPException(400,"Invalid request to add item")
 @app.get("/customer/{customer_name}", response_model=list[CustomerResponse])
 def customer_data(customer_name: str,service : Annotated[Service,Depends(get_service)]):
     customers =service.Lookup_customer(customer_name)
