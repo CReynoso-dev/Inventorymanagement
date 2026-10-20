@@ -42,8 +42,9 @@ class Service():
             else:
                 raise TypeError(f"Input {arg} is the wrong type")
         self.repo.Add_product(upc,name,quantity,price,description)
-    def Add_customer(self,name,number,email,timewith):
+    def Add_customer(self,name : str,number : str,email : str,timewith : int):
         approved = {name : str, number : str, email : str , timewith : int}
+
         for arg,types in approved.items():
             if type(arg) == types:
                 continue
