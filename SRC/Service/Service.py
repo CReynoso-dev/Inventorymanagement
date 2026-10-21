@@ -12,7 +12,7 @@ class Service():
     @validates("email")
     def _Email_checker(self, key, address):
         if not address:
-            raise ValueError("No email detected")
+            return
         try:
             email_info = validate_email(address, check_deliverability=False)
 
@@ -65,11 +65,21 @@ class Service():
             raise TypeError("customer_id is wrong type must be a String")
     def Edit_item_info(self,item_id : str,upc = None,name = None,quantity = None,price = None,description = None):
         update_check = {"upc": upc, "name": name, "quantity": quantity, "price": price, "description": description}
+        approved_types = {upc : str, name : str, quantity : int, price : int, description : str}
         confirmed_updates = {}
-        item_iduuid = uuid.UUID(item_id)
+        if type(item_id) == str:
+            item_iduuid = uuid.UUID(item_id)
+        else:
+            raise TypeError("item_id must be a string")
+
+
         for key, value in update_check.items():
             if value is not None:
+                if type(value) != approved_types[value]:
+                    raise TypeError("incorrect type for edited column")
                 confirmed_updates[key] = value
+            else:
+                continue
         self.repo.Edit_product_info(item_iduuid,confirmed_updates)
     def Edit_customer_info(self,customer_id: str , name = None, number = None, email = None, timewith = None):
         update_check = {"name": name, "number": number, "email": email, "timewith": timewith}
@@ -81,10 +91,12 @@ class Service():
         else:
             raise TypeError("customer_id must be str")
         for key,value in update_check.items():
-            if type(value) != approved_types[value]:
-                raise TypeError("incorrect type for edited column")
             if value is not None:
+                if type(value) != approved_types[value]:
+                    raise TypeError("incorrect type for edited column")
                 confirmed_updates[key] = value
+            else:
+                continue
 
         self.repo.Edit_customer_info(customer_iduuid,confirmed_updates)
 
