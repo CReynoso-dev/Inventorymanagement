@@ -42,7 +42,13 @@ def search_customer(customer_name: str,service : Annotated[Service,Depends(get_s
 def customer_update(customer_id : str,customer : CustomerUpdate,service : Annotated[Service,Depends(get_service)]):
     service.Edit_customer_info(customer_id,name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
     return customer
-
+@app.delete("/customer/{customer_id}/delete")
+def customer_delete(customer_id : str,service : Annotated[Service,Depends(get_service)]):
+    try:
+        service.Delete_customer(customer_id)
+        return True
+    except:
+        raise HTTPException(status_code=200)
 @app.get("/item/{item_name}", response_model=list[ProductResponse])
 def item_data(item_name: str,service : Annotated[Service,Depends(get_service)]):
     items = service.Lookup_product(item_name)
@@ -54,3 +60,11 @@ def item_data(item_name: str,service : Annotated[Service,Depends(get_service)]):
 def item_update(product_id : str,item : ProductUpdate,service : Annotated[Service,Depends(get_service)]):
     service.Edit_item_info(product_id,upc=item.upc,name=item.name,quantity=item.quantity,price=item.price,description=item.description)
     return item
+
+@app.delete("/item/{product_id}/delete")
+def item_delete(product_id : str,service : Annotated[Service,Depends(get_service)]):
+    try:
+        service.Delete_item(product_id)
+        return True
+    except:
+        raise HTTPException(status_code=200,detail="could not delete item")
