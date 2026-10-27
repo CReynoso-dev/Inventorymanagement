@@ -96,8 +96,7 @@ class Database():
         Base.metadata.create_all(self.engine)
 
     def Get_connection(self):
-        with Session(self.engine) as session:
-            return session
+            return Session(self.engine)
 
 
 
