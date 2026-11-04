@@ -10,10 +10,11 @@ class Repository():
         #super().__init__(db_path)
         self.db = db
 
-    def Search_product(self, search):
-        with self.db.Get_connection() as conn:
+    def Search_product(self, search,connection):
 
-            product = conn.query(Product).filter(Product.name.like(f"{search}%")).all()
+
+
+        product = connection.query(Product).filter(Product.name.like(f"{search}%")).all()
 
         return product
 
@@ -22,38 +23,34 @@ class Repository():
 
 
 
-    def Search_customer(self, search):
-        with self.db.Get_connection() as conn:
-            customer = conn.query(Customer).filter(Customer.name.like(f"{search}%")).all()
+    def Search_customer(self, search,connection):
+        customer = connection.query(Customer).filter(Customer.name.like(f"{search}%")).all()
 
         return customer
 
     def Add_product(self, upc, name, quantity,price, description):
-        with self.db.Get_connection() as conn:
-            name = Product(upc = upc ,name = name ,quantity = quantity, price = price, description = description)
-            conn.add(name)
-            conn.commit()
+            added_product = Product(upc = upc ,name = name ,quantity = quantity, price = price, description = description)
+            return added_product
+
 
 
 
     def Add_customer_info(self, name, number, email, timewith):
-        with self.db.Get_connection() as conn:
-            customer = Customer(name = name, number = number,email = email, timewith = timewith)
-            conn.add(customer)
-            conn.commit()
+        customer = Customer(name = name, number = number,email = email, timewith = timewith)
+        return customer
 
 
 
 
 
 
-    def Edit_customer_info(self, customer_id : uuid.UUID , confirmed_updates : dict):
-        conn = self.db.Get_connection()
+    def Edit_customer_info(self, customer_id : uuid.UUID , confirmed_updates : dict,conn):
+
         customer = self.Get_Customer(customer_id,conn)
         for columns,data in confirmed_updates.items():
             setattr(customer,columns,data)
 
-        conn.commit()
+
 
     def Get_product(self,product_id,conn):
 
@@ -65,26 +62,24 @@ class Repository():
         customer = conn.scalars(sql).one()
         return customer
 
-    def Edit_product_info(self,product_id : uuid.UUID,confirmed_updates : dict):
-        conn = self.db.Get_connection()
+    def Edit_product_info(self,product_id : uuid.UUID,confirmed_updates : dict,conn):
+
 
         product = self.Get_product(product_id,conn)
 
         for column, value in confirmed_updates.items():
             setattr(product,column,value)
-        conn.commit()
+
 
     def Delete_product_info(self,product_id: uuid.UUID):
-        conn = self.db.Get_connection()
         sql = delete(Product).where(Product.product_id == product_id)
-        conn.execute(sql)
-        conn.commit()
+        return sql
+
 
     def Delete_customer_info(self,customer_id : uuid.UUID):
-        conn = self.db.Get_connection()
         sql = sql = delete(Customer).where(Customer.customer_id == customer_id)
-        conn.execute(sql)
-        conn.commit()
+        return sql
+
 
 
 
