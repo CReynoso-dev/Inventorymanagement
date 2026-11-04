@@ -5,18 +5,19 @@ from SRC.Service.Service import Service
 from typing import Annotated
 from SRC.API.response_models import CustomerResponse,ProductResponse
 from SRC.API.request_models import CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
-
+from SRC.Transaction_manager.Transaction_manager import Transaction_manager
 app = FastAPI()
 def get_db(sql="sqlite",name="store.db"):
     return Database(sql=sql,db_name=name)
-
+def get_trans_manager(db = Depends(get_db)):
+    return Transaction_manager(db=db)
 def get_repo(db=Depends(get_db)):
     return Repository(db)
-def get_service(repo = Depends(get_repo)):
-    return Service(repository=repo)
+def get_service(repo = Depends(get_repo),trans = Depends(get_trans_manager)):
+    return Service(repository=repo,trans_manager=trans)
 
 
-@app.post("/customer/")
+@app.post("/customer/create")
 def Add_customer(customer: CustomerCreate, service: Annotated[Service, Depends(get_service)]):
     #need to improve error catching
     try:
@@ -25,7 +26,7 @@ def Add_customer(customer: CustomerCreate, service: Annotated[Service, Depends(g
     except:
         raise HTTPException(400,"Invalid request to add customer")
 
-@app.post("/item/",status_code=201)
+@app.post("/item/create",status_code=201)
 def Add_item(item : ProductCreate, service: Annotated[Service, Depends(get_service)]):
     #need to improve error catching
     try:
