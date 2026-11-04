@@ -8,18 +8,33 @@ class Transaction_manager():
     def __init__(self,db : Database):
         self.database = db
 
-    @contextmanager
-    def create_transaction(self):
+
+    def start_transaction(self):
         session = self.database.Get_connection()
+        return session
+    def confirm_orm_object(self, session : Session, object):
         try:
-            yield session
-            session.commit()
+            session.add(object)
         except:
             session.rollback()
-            raise ValueError("rollback")
+            raise "standin for real error"
+    def execute_orm_sql(self,session : Session,sql):
+        try:
+            session.execute(sql)
+        except:
+            session.rollback()
+            raise "standin for real error"
 
-        finally:
+
+    def end_transaction(self,session : Session):
+        try:
+            session.commit()
             session.close()
+        except:
+            session.rollback()
+            raise "error"
+
+
 
 
 
