@@ -8,10 +8,16 @@ class Transaction_manager():
     def __init__(self,db : Database):
         self.database = db
 
-
+    @contextmanager
     def start_transaction(self):
         session = self.database.Get_connection()
-        return session
+        try:
+            yield session
+            session.commit()
+        except:
+            session.rollback()
+        finally:
+            session.close()
     def confirm_orm_object(self, session : Session, object):
         try:
             session.add(object)
