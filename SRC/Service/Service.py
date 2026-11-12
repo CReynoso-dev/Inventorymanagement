@@ -1,4 +1,5 @@
 import uuid
+from SRC.Service.dto_models import ProductDTO,CustomerDTO
 from SRC.Database.database import validates,validate_email,EmailNotValidError
 from SRC.Repo.Repository import Repository
 from SRC.Transaction_manager.Transaction_manager import Transaction_manager
@@ -13,63 +14,63 @@ class Service():
 
     def Lookup_product(self,name : str):
         if type(name) == str:
-            session = self.transaction.start_transaction()
-            products = self.repo.Search_product(name,session)
+            with self.transaction.start_transaction() as session:
+                products = self.repo.Search_product(name,session)
+                products_list = [ProductDTO.model_validate(product,from_attributes=True) for product in products]
+                return products_list
         else:
             raise TypeError(f"Only named lookup input must be String. Current input:{type(name)}")
-        #self.transaction.end_transaction(session)
-        return products
+
 
     def Lookup_customer(self,name : str):
         if type(name) == str:
-            session = self.transaction.start_transaction()
-            customers = self.repo.Search_customer(name,session)
+            with self.transaction.start_transaction() as session:
+                customers = self.repo.Search_customer(name,session)
+                customers_list = [CustomerDTO.model_validate(customer,from_attributes=True) for customer in customers]
+                return customers_list
         else:
             raise TypeError(f"Named lookup only input must be String. Current input:{type(name)}")
 
-        return customers
     def Add_item(self,upc : str,name : str,quantity : int,price : int,description : str):
         approved = { upc : str,name : str,quantity : int,price : int,description : str}
-        conn = self.transaction.start_transaction()
+
         for arg,types in approved.items():
             if type(arg) == types:
                 continue
             else:
                 raise TypeError(f"Input {arg} is the wrong type")
-        added_product = self.repo.Add_product(upc,name,quantity,price,description)
-        self.transaction.confirm_orm_object(conn, added_product)
-        self.transaction.end_transaction(conn)
+
+        with self.transaction.start_transaction() as conn:
+            self.repo.Add_product(upc, name, quantity, price, description,conn)
+
 
     def Add_customer(self,name : str,number : str,email : str,timewith : int):
         approved = {name : str, number : str, email : str , timewith : int}
-        conn = self.transaction.start_transaction()
+
         for arg,types in approved.items():
             if type(arg) == types:
                 continue
             else:
                 raise TypeError(f"Input {arg} is the wrong type")
-        customer = self.repo.Add_customer_info(name,number,email,timewith)
-        self.transaction.confirm_orm_object(conn,customer)
-        self.transaction.end_transaction(conn)
+        with self.transaction.start_transaction() as conn:
+            self.repo.Add_customer_info(name, number, email, timewith,conn)
+
 
 
 
     def Delete_item(self,product_id : str):
         if type(product_id) == str:
-            conn = self.transaction.start_transaction()
-            sql = self.repo.Delete_product_info(product_id=uuid.UUID(product_id))
-            self.transaction.execute_orm_sql(conn,sql)
-            self.transaction.end_transaction(conn)
+            with self.transaction.start_transaction() as session:
+                self.repo.Delete_product_info(product_id=uuid.UUID(product_id),session= session)
+
         else:
             raise TypeError("Product_id is wrong type must be a String")
 
 
     def Delete_customer(self,customer_id: str):
         if type(customer_id) == str:
-            conn = self.transaction.start_transaction()
-            sql = self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id))
-            self.transaction.execute_orm_sql(conn,sql)
-            self.transaction.end_transaction(conn)
+            with self.transaction.start_transaction() as session:
+                self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)
         else:
             raise TypeError("customer_id is wrong type must be a String")
 
@@ -90,9 +91,8 @@ class Service():
                 confirmed_updates[key] = value
             else:
                 continue
-        conn = self.transaction.start_transaction()
-        self.repo.Edit_product_info(item_iduuid,confirmed_updates,conn)
-        self.transaction.end_transaction(conn)
+        with self.transaction.start_transaction() as conn:
+            self.repo.Edit_product_info(item_iduuid,confirmed_updates,conn)
     def Edit_customer_info(self,customer_id: str , name = None, number = None, email = None, timewith = None):
         update_check = {"name": name, "number": number, "email": email, "timewith": timewith}
         approved_types = {name:str,number:str,email:str,timewith:int}
@@ -109,9 +109,9 @@ class Service():
                 confirmed_updates[key] = value
             else:
                 continue
-        conn = self.transaction.start_transaction()
-        self.repo.Edit_customer_info(customer_iduuid,confirmed_updates,conn)
-        self.transaction.end_transaction(conn)
+        with self.transaction.start_transaction() as conn:
+            self.repo.Edit_customer_info(customer_iduuid,confirmed_updates,conn)
+
 
 
 
