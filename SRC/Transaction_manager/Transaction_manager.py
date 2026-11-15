@@ -14,22 +14,14 @@ class Transaction_manager():
         try:
             yield session
             session.commit()
-        except:
+        except Exception:
             session.rollback()
+            raise
+
         finally:
             session.close()
-    def confirm_orm_object(self, session : Session, object):
-        try:
-            session.add(object)
-        except:
-            session.rollback()
-            raise "standin for real error"
-    def execute_orm_sql(self,session : Session,sql):
-        try:
-            session.execute(sql)
-        except:
-            session.rollback()
-            raise "standin for real error"
+
+
 
 
     def end_transaction(self,session : Session):
