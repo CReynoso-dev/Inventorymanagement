@@ -3,6 +3,7 @@ from SRC.Service.dto_models import ProductDTO,CustomerDTO
 from SRC.Database.database import validates,validate_email,EmailNotValidError
 from SRC.Repo.Repository import Repository
 from SRC.Transaction_manager.Transaction_manager import Transaction_manager
+from SRC.Custom_Exceptions.Custom_Error import Deleteunknowncustomererror,Invalididerror,DeleteunknownproductError,OutofstockError,ProductnotfoundError,CustomernotfoundError
 
 class Service():
     def __init__(self,repository : Repository,trans_manager : Transaction_manager):
@@ -17,7 +18,10 @@ class Service():
             with self.transaction.start_transaction() as session:
                 products = self.repo.Search_product(name,session)
                 products_list = [ProductDTO.model_validate(product,from_attributes=True) for product in products]
-                return products_list
+                if len(products_list) > 0:
+                    return products_list
+                else:
+                    raise ProductnotfoundError("Please ensure spelling is correct",name)
         else:
             raise TypeError(f"Only named lookup input must be String. Current input:{type(name)}")
 
@@ -27,7 +31,10 @@ class Service():
             with self.transaction.start_transaction() as session:
                 customers = self.repo.Search_customer(name,session)
                 customers_list = [CustomerDTO.model_validate(customer,from_attributes=True) for customer in customers]
-                return customers_list
+                if len(customers_list) > 0:
+                    return customers_list
+                else:
+                    raise CustomernotfoundError("please ensure spelling is correct",name)
         else:
             raise TypeError(f"Named lookup only input must be String. Current input:{type(name)}")
 
@@ -59,20 +66,34 @@ class Service():
 
 
     def Delete_item(self,product_id : str):
-        if type(product_id) == str:
+        if type(product_id) == str and len(product_id) >= 32:
             with self.transaction.start_transaction() as session:
-                self.repo.Delete_product_info(product_id=uuid.UUID(product_id),session= session)
+                if (deletedrow := self.repo.Delete_product_info(product_id=uuid.UUID(product_id),session= session)):
+                    return deletedrow
+                else:
+                    raise DeleteunknownproductError("could not find product attached to UUID please confirm correct UUID and retry",product_id)
 
-        else:
+        elif type(product_id) != str:
             raise TypeError("Product_id is wrong type must be a String")
+        elif len(product_id) < 32:
+            raise Invalididerror("enter Product id in one of the correct format listed",product_id,"Product")
+
+
+
 
 
     def Delete_customer(self,customer_id: str):
-        if type(customer_id) == str:
+        if type(customer_id) == str and len(customer_id) >= 32:
             with self.transaction.start_transaction() as session:
-                self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)
-        else:
+                if (deletedrow := self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)):
+                    return deletedrow
+                #self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)
+                else:
+                    raise Deleteunknowncustomererror("enter customer id in one of the correct format listed",customer_id)
+        elif type(customer_id) != str:
             raise TypeError("customer_id is wrong type must be a String")
+        elif len(customer_id) < 32:
+            raise Invalididerror("enter Customer id in one of the correct format listed",customer_id,"Customer")
 
     def Edit_item_info(self,item_id : str,upc = None,name = None,quantity = None,price = None,description = None):
         update_check = {"upc": upc, "name": name, "quantity": quantity, "price": price, "description": description}
