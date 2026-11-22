@@ -4,7 +4,7 @@ from SRC.Database.database import Database
 from sqlalchemy import select,delete,inspect
 from sqlalchemy.orm import Session
 from SRC.Database.database import Customer,Product
-
+from SRC.Custom_Exceptions.Custom_Error import Deleteunknowncustomererror,ProductnotfoundError,CustomernotfoundError,DeleteunknownproductError
 
 class Repository():
     def __init__(self,db : Database):
@@ -39,9 +39,12 @@ class Repository():
 
 
     def Add_customer_info(self, name, number, email, timewith,session : Session):
-        customer = Customer(name = name, number = number,email = email, timewith = timewith)
-        session.add(customer)
-        return customer
+        try:
+            customer = Customer(name = name, number = number,email = email, timewith = timewith)
+            session.add(customer)
+            return customer
+        except Exception as e:
+            raise
 
 
 
@@ -76,15 +79,22 @@ class Repository():
 
 
     def Delete_product_info(self,product_id: uuid.UUID,session : Session):
-        sql = delete(Product).where(Product.product_id == product_id)
-        session.execute(sql)
-        return sql
+        sql = delete(Product).where(Product.product_id == product_id).returning(Product.product_id,Product.name)
+
+        if len((result :=session.execute(sql).all())) > 0:
+            return result
+        else:
+            raise DeleteunknownproductError("could not find product attached to UUID please confirm correct UUID and retry",product_id)
 
 
     def Delete_customer_info(self,customer_id : uuid.UUID,session : Session):
         sql = sql = delete(Customer).where(Customer.customer_id == customer_id)
-        session.execute(sql)
-        return sql
+        if len((result := session.execute(sql).all())) > 0:
+            return result
+        else:
+            raise Deleteunknowncustomererror("could not find customer attached to UUID please confirm correct UUID and retry",customer_id)
+
+
 
 
 
