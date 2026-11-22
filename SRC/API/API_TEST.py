@@ -6,7 +6,24 @@ from typing import Annotated
 from SRC.API.response_models import CustomerResponse,ProductResponse
 from SRC.API.request_models import CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
 from SRC.Transaction_manager.Transaction_manager import Transaction_manager
+from SRC.Custom_Exceptions.Custom_Error import Deleteunknowncustomererror,Invalididerror,OutofstockError,DeleteunknownproductError,ProductnotfoundError,CustomernotfoundError
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
 app = FastAPI()
+@app.exception_handler(OutofstockError)
+def outofstockerrorhandler(request : Request,exc: OutofstockError):
+    return JSONResponse(status_code=422,content= {"detail":str(exc)})
+@app.exception_handler(DeleteunknownproductError)
+def unknownproductdeleteerrorhandler(request : Request,exc : DeleteunknownproductError):
+    return JSONResponse(status_code=404,content= {"detail":str(exc)})
+@app.exception_handler(Deleteunknowncustomererror)
+def unknowncustomerdeleteerrorhandler(request : Request,exc : Deleteunknowncustomererror):
+    return JSONResponse(status_code=404,content= {"detail":str(exc)})
+@app.exception_handler(Invalididerror)
+def invalididerror(request : Request,exc : Invalididerror):
+    return JSONResponse(status_code=400,content= {"detail":str(exc)})
+
 def get_db(sql="sqlite",name="store.db"):
     return Database(sql=sql,db_name=name)
 def get_trans_manager(db = Depends(get_db)):
@@ -23,8 +40,10 @@ def Add_customer(customer: CustomerCreate, service: Annotated[Service, Depends(g
     try:
         service.Add_customer(name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
         return True
-    except:
-        raise HTTPException(400,"Invalid request to add customer")
+    except Exception as e:
+        return e
+
+        #raise HTTPException(400,"Invalid request to add customer")
 
 @app.post("/item/create",status_code=201)
 def Add_item(item : ProductCreate, service: Annotated[Service, Depends(get_service)]):
@@ -45,11 +64,9 @@ def customer_update(customer_id : str,customer : CustomerUpdate,service : Annota
     return customer
 @app.delete("/customer/{customer_id}/delete")
 def customer_delete(customer_id : str,service : Annotated[Service,Depends(get_service)]):
-    try:
-        service.Delete_customer(customer_id)
-        return True
-    except:
-        raise HTTPException(status_code=200)
+    deletedrow = service.Delete_customer(customer_id)
+    return deletedrow
+
 @app.get("/item/{item_name}", response_model=list[ProductResponse])
 def item_data(item_name: str,service : Annotated[Service,Depends(get_service)]):
     items = service.Lookup_product(item_name)
@@ -64,8 +81,7 @@ def item_update(product_id : str,item : ProductUpdate,service : Annotated[Servic
 
 @app.delete("/item/{product_id}/delete")
 def item_delete(product_id : str,service : Annotated[Service,Depends(get_service)]):
-    try:
-        service.Delete_item(product_id)
-        return True
-    except:
-        raise HTTPException(status_code=200,detail="could not delete item")
+    deletedrow = service.Delete_item(product_id)
+    return deletedrow
+
+
