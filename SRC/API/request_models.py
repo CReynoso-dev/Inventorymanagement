@@ -2,9 +2,9 @@ from pydantic import BaseModel,ConfigDict,AfterValidator,BeforeValidator,field_v
 from SRC.Custom_Exceptions.Custom_Error import Incorrectcustomernumberlengtherror,Incorrectcustomernumbernxxformaterror
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
+
 class USPhoneNumber(PhoneNumber):
     default_region_code = "US"
-    phone_format = "E164"
     phone_format = "NATIONAL"
 class CustomerCreate(BaseModel):
     name: str
@@ -16,7 +16,7 @@ class CustomerCreate(BaseModel):
 
 class CustomerUpdate(BaseModel):
     name: str | None
-    number: str | None
+    number: USPhoneNumber | None
     email: str | None
     timewith: int | None
     model_config = ConfigDict(from_attributes=True)
