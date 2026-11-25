@@ -62,6 +62,36 @@ class Deleteunknowncustomererror(Exception):
 
     def __str__(self):
         return f"UUID: {self.searched_input} was not recognized\n{self.message}."
+
+
+class Incorrectcustomeremailformaterror(Exception):
+    def __init__(self, message,emailinputed):
+        super().__init__(message)
+        self.message = message
+        self.emailinputed = emailinputed
+    def __str__(self):
+        return f"incorrect email format submitted: {self.emailinputed} {self.message}"
+
+class Incorrectcustomernumberlengtherror(Exception):
+    def __init__(self,message,numberinputed):
+        super().__init__(message)
+        self.message = message
+        self.numberinputed = numberinputed
+
+    def __str__(self):
+        return f"incorrect number format submitted: {self.numberinputed} {self.message}"
+class Incorrectcustomernumbernxxformaterror(Exception):
+    def __init__(self,message,numberinputed):
+        super().__init__(message)
+        self.message = message
+        self.numberinputed = numberinputed
+
+
+    def __str__(self):
+        return f"incorrect number format submitted: {self.numberinputed} {self.message}"
+
+
+
 class CustomernotfoundError(Exception):
     def __init__(self,message,searched_input):
         super().__init__(message)
