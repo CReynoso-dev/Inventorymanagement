@@ -6,24 +6,9 @@ from typing import Annotated
 from SRC.API.response_models import CustomerResponse,ProductResponse
 from SRC.API.request_models import CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
 from SRC.Transaction_manager.Transaction_manager import Transaction_manager
-from SRC.Custom_Exceptions.Custom_Error import Deleteunknowncustomererror,Invalididerror,OutofstockError,DeleteunknownproductError,ProductnotfoundError,CustomernotfoundError
-from fastapi import Request
-from fastapi.responses import JSONResponse
-
+from SRC.Custom_Exceptions.Exception_handler import Registerexceptionhandlers
 app = FastAPI()
-@app.exception_handler(OutofstockError)
-def outofstockerrorhandler(request : Request,exc: OutofstockError):
-    return JSONResponse(status_code=422,content= {"detail":str(exc)})
-@app.exception_handler(DeleteunknownproductError)
-def unknownproductdeleteerrorhandler(request : Request,exc : DeleteunknownproductError):
-    return JSONResponse(status_code=404,content= {"detail":str(exc)})
-@app.exception_handler(Deleteunknowncustomererror)
-def unknowncustomerdeleteerrorhandler(request : Request,exc : Deleteunknowncustomererror):
-    return JSONResponse(status_code=404,content= {"detail":str(exc)})
-@app.exception_handler(Invalididerror)
-def invalididerror(request : Request,exc : Invalididerror):
-    return JSONResponse(status_code=400,content= {"detail":str(exc)})
-
+Registerexceptionhandlers(app)
 def get_db(sql="sqlite",name="store.db"):
     return Database(sql=sql,db_name=name)
 def get_trans_manager(db = Depends(get_db)):
@@ -36,14 +21,9 @@ def get_service(repo = Depends(get_repo),trans = Depends(get_trans_manager)):
 
 @app.post("/customer/create")
 def Add_customer(customer: CustomerCreate, service: Annotated[Service, Depends(get_service)]):
-    #need to improve error catching
-    try:
-        service.Add_customer(name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
-        return True
-    except Exception as e:
-        return e
+    service.Add_customer(name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
 
-        #raise HTTPException(400,"Invalid request to add customer")
+
 
 @app.post("/item/create",status_code=201)
 def Add_item(item : ProductCreate, service: Annotated[Service, Depends(get_service)]):
