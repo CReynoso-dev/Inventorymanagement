@@ -44,7 +44,7 @@ class Repository():
             session.add(customer)
             return customer
         except Exception as e:
-            raise
+            raise e
 
 
 
@@ -79,16 +79,16 @@ class Repository():
 
 
     def Delete_product_info(self,product_id: uuid.UUID,session : Session):
-        sql = delete(Product).where(Product.product_id == product_id).returning(Product.product_id,Product.name)
+        sql = delete(Product).where(Product.product_id == product_id).returning(Product.product_id,Product.upc,Product.name,Product.quantity,Product.price,Product.description)
 
-        if len((result :=session.execute(sql).all())) > 0:
+        if len((result := session.execute(sql).all())) > 0:
             return result
         else:
             raise DeleteunknownproductError("could not find product attached to UUID please confirm correct UUID and retry",product_id)
 
 
     def Delete_customer_info(self,customer_id : uuid.UUID,session : Session):
-        sql = sql = delete(Customer).where(Customer.customer_id == customer_id)
+        sql = delete(Customer).where(Customer.customer_id == customer_id).returning(Customer.customer_id,Customer.name,Customer.number,Customer.email,Customer.timewith)
         if len((result := session.execute(sql).all())) > 0:
             return result
         else:

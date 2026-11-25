@@ -60,7 +60,10 @@ class Service():
             else:
                 raise TypeError(f"Input {arg} is the wrong type")
         with self.transaction.start_transaction() as conn:
-            self.repo.Add_customer_info(name, number, email, timewith,conn)
+            try:
+                self.repo.Add_customer_info(name, number, email, timewith,conn)
+            except Exception as e:
+                raise e
 
 
 
@@ -68,7 +71,8 @@ class Service():
     def Delete_item(self,product_id : str):
         if type(product_id) == str and len(product_id) >= 32:
             with self.transaction.start_transaction() as session:
-                if (deletedrow := self.repo.Delete_product_info(product_id=uuid.UUID(product_id),session= session)):
+                if (deletedrowsql := self.repo.Delete_product_info(product_id=uuid.UUID(product_id),session= session)):
+                    deletedrow = [ProductDTO.model_validate(product,from_attributes=True) for product in deletedrowsql]
                     return deletedrow
                 else:
                     raise DeleteunknownproductError("could not find product attached to UUID please confirm correct UUID and retry",product_id)
@@ -85,7 +89,8 @@ class Service():
     def Delete_customer(self,customer_id: str):
         if type(customer_id) == str and len(customer_id) >= 32:
             with self.transaction.start_transaction() as session:
-                if (deletedrow := self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)):
+                if (deletedrowsql := self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)):
+                    deletedrow = [CustomerDTO.model_validate(customer) for customer in deletedrowsql]
                     return deletedrow
                 #self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)
                 else:
