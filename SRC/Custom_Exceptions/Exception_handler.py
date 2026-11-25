@@ -3,6 +3,8 @@ from fastapi import Request,FastAPI
 from SRC.Custom_Exceptions.Custom_Error import Incorrectcustomernumbernxxformaterror,Incorrectcustomernumberlengtherror,Incorrectcustomeremailformaterror,Deleteunknowncustomererror,Invalididerror,OutofstockError,DeleteunknownproductError,ProductnotfoundError,CustomernotfoundError
 
 def Registerexceptionhandlers(app :FastAPI):
+    app.add_exception_handler(CustomernotfoundError,Customernotfounderrorhandler)
+    app.add_exception_handler(ProductnotfoundError,Productnotfounderrorhandler)
     app.add_exception_handler(Incorrectcustomernumberlengtherror,Incorrectnumberlengtherrorhandler)
     app.add_exception_handler(Incorrectcustomernumbernxxformaterror,Incorrectnumbernxxformaterrorhandler)
     app.add_exception_handler(Incorrectcustomeremailformaterror,Incorrectemailformaterrorhandler)
@@ -10,6 +12,10 @@ def Registerexceptionhandlers(app :FastAPI):
     app.add_exception_handler(DeleteunknownproductError,unknownproductdeleteerrorhandler)
     app.add_exception_handler(Deleteunknowncustomererror,unknowncustomerdeleteerrorhandler)
     app.add_exception_handler(Invalididerror,invalididerror)
+def Productnotfounderrorhandler(request : Request, exc : ProductnotfoundError):
+    return JSONResponse(status_code=404,content= {"detail":str(exc)})
+def Customernotfounderrorhandler(request : Request, exc : CustomernotfoundError):
+    return JSONResponse(status_code=404,content={"detail":str(exc)})
 def Incorrectnumberlengtherrorhandler(request : Request, exc : Incorrectcustomernumberlengtherror):
     return JSONResponse(status_code=422,content={"detail":str(exc)})
 
