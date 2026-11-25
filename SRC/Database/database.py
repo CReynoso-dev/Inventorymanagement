@@ -5,6 +5,7 @@ from sqlalchemy import create_engine,column,Integer,String,ForeignKey,text,Selec
 from sqlalchemy.orm import sessionmaker,Session,mapped_column,Mapped,validates,relationship,DeclarativeBase
 from email_validator import validate_email,EmailNotValidError
 from pathlib import Path
+from SRC.Custom_Exceptions.Custom_Error import Incorrectcustomeremailformaterror
 
 def new_uuid() -> uuid.UUID:
     # Note: Work around UUIDs with leading zeros: https://github.com/tiangolo/sqlmodel/issues/25
@@ -36,8 +37,8 @@ class Customer(Base):
             email_info = validate_email(address,check_deliverability=False)
 
             return email_info.normalized
-        except EmailNotValidError as error:
-            raise EmailNotValidError
+        except EmailNotValidError:
+            raise Incorrectcustomeremailformaterror("please try with correct format",address)
 
 class Product(Base):
     __tablename__ = "Product"
