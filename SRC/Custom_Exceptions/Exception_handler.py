@@ -1,8 +1,9 @@
 from fastapi.responses import JSONResponse
 from fastapi import Request,FastAPI
-from SRC.Custom_Exceptions.Custom_Error import Editunknownproducterror,Editunknowncustomererror,Incorrectcustomernumbernxxformaterror,Incorrectcustomernumberlengtherror,Incorrectcustomeremailformaterror,Deleteunknowncustomererror,Invalididerror,OutofstockError,DeleteunknownproductError,ProductnotfoundError,CustomernotfoundError
+from SRC.Custom_Exceptions.Custom_Error import EmptyEditerror,Editunknownproducterror,Editunknowncustomererror,Incorrectcustomernumbernxxformaterror,Incorrectcustomernumberlengtherror,Incorrectcustomeremailformaterror,Deleteunknowncustomererror,Invalididerror,OutofstockError,DeleteunknownproductError,ProductnotfoundError,CustomernotfoundError
 
 def Registerexceptionhandlers(app :FastAPI):
+    app.add_exception_handler(EmptyEditerror, EmptyEditerrorhandler)
     app.add_exception_handler(Editunknownproducterror,Editunknownproducterrorhandler)
     app.add_exception_handler(Editunknowncustomererror,Editunknowncustomererrorhandler)
     app.add_exception_handler(CustomernotfoundError,Customernotfounderrorhandler)
@@ -14,6 +15,9 @@ def Registerexceptionhandlers(app :FastAPI):
     app.add_exception_handler(DeleteunknownproductError,unknownproductdeleteerrorhandler)
     app.add_exception_handler(Deleteunknowncustomererror,unknowncustomerdeleteerrorhandler)
     app.add_exception_handler(Invalididerror,invalididerror)
+
+def EmptyEditerrorhandler(request : Request, exc : EmptyEditerror):
+    return JSONResponse(status_code=404,content={"detail":str(exc)})
 def Editunknownproducterrorhandler(request : Request, exc : Editunknownproducterror):
     return JSONResponse(status_code=404,content={"detail":str(exc)})
 def Editunknowncustomererrorhandler(request : Request, exc : Editunknowncustomererror):

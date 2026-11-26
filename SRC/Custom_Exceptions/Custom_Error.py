@@ -81,7 +81,13 @@ class Editunknowncustomererror(Exception):
     def __str__(self):
         return f"UUID: {self.searched_input} was not recognized\n{self.message}."
 
+class EmptyEditerror(Exception):
+    def __init__(self,message):
+        super().__init__(message)
+        self.message = message
 
+    def __str__(self):
+        return f"{self.message}"
 class Incorrectcustomeremailformaterror(Exception):
     def __init__(self, message,emailinputed):
         super().__init__(message)
