@@ -1,15 +1,16 @@
 import uuid
 
-from pydantic import BaseModel,ConfigDict,AfterValidator,BeforeValidator,field_validator,Field
+from pydantic import BaseModel,ConfigDict,AfterValidator,BeforeValidator,field_validator,Field,model_validator
 from SRC.Custom_Exceptions.Custom_Error import Incorrectcustomernumberlengtherror,Incorrectcustomernumbernxxformaterror
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic import EmailStr,UUID4
-
+from SRC.Custom_Exceptions.Custom_Error import EmptyEditerror
 class USPhoneNumber(PhoneNumber):
     default_region_code = "US"
     phone_format = "NATIONAL"
+    supported_regions = ["US"]
 class CustomerCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1,max_length=50)
     number: USPhoneNumber
     email: EmailStr
     timewith: int = Field(ge=0)
@@ -24,24 +25,35 @@ class Product_ID(BaseModel):
 
 
 class CustomerUpdate(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None,min_length=1,max_length=50)
     number: USPhoneNumber | None = None
     email: EmailStr | None = None
-    timewith: int | None = None
+    timewith: int | None = Field(ge=0,default=None)
     model_config = ConfigDict(from_attributes=True)
 
+    @model_validator(mode="after")
+    def checkifempty(self):
+        if not self.model_dump(exclude_none=True).values():
+            raise EmptyEditerror("No edits were made please enter a edit to Customer and try again")
+        return self
 class ProductCreate(BaseModel):
-    upc: str
-    name: str
-    quantity: int
-    price: int
-    description: str
+    upc: str = Field(min_length=12,max_length=12)
+    name: str = Field(min_length=1,max_length=80)
+    quantity: int = Field(ge=0)
+    price: int = Field(ge=0)
+    description: str = Field(max_length=99)
     model_config = ConfigDict(from_attributes=True)
 
 class ProductUpdate(BaseModel):
-    upc: str | None = None
-    name: str | None = None
-    quantity: int | None = None
-    price: int | None = None
-    description: str | None = None
+    upc: str | None = Field(default= None,min_length=12,max_length=12)
+    name: str | None = Field(default=None,min_length=1,max_length=80)
+    quantity: int | None = Field(ge=0,default=None)
+    price: int | None = Field(ge=0,default=None)
+    description: str | None = Field(default=None,max_length=99)
     model_config = ConfigDict(from_attributes=True)
+
+    @model_validator(mode="after")
+    def checkifempty(self):
+        if not self.model_dump(exclude_none=True).values():
+            raise EmptyEditerror("No edits were made please enter a edit to Product and try again")
+        return self
