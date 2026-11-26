@@ -29,16 +29,6 @@ class Customer(Base):
 
 
 
-    @validates("email")
-    def Email_checker(self,key,address):
-        if not address:
-            raise ValueError("No email detected")
-        try:
-            email_info = validate_email(address,check_deliverability=False)
-
-            return email_info.normalized
-        except EmailNotValidError:
-            raise Incorrectcustomeremailformaterror("please try with correct format",address)
 
 class Product(Base):
     __tablename__ = "Product"
