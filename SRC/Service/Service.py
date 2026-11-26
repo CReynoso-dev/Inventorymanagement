@@ -1,9 +1,9 @@
-import uuid
+
 from SRC.Service.dto_models import ProductDTO,CustomerDTO
-from SRC.Database.database import validates,validate_email,EmailNotValidError
 from SRC.Repo.Repository import Repository
 from SRC.Transaction_manager.Transaction_manager import Transaction_manager
 from SRC.Custom_Exceptions.Custom_Error import Deleteunknowncustomererror,Invalididerror,DeleteunknownproductError,OutofstockError,ProductnotfoundError,CustomernotfoundError
+from SRC.API.request_models import Customer_ID,Product_ID,CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
 
 class Service():
     def __init__(self,repository : Repository,trans_manager : Transaction_manager):
@@ -11,7 +11,6 @@ class Service():
         self.repo = repository
         self.transaction = trans_manager
 #lookup methods are only for name currently must add different types of lookups
-    #using the sqlalchemy validator decorator to make a standard validator for email on database edits
 
     def Lookup_product(self,name : str):
         if type(name) == str:
@@ -38,105 +37,56 @@ class Service():
         else:
             raise TypeError(f"Named lookup only input must be String. Current input:{type(name)}")
 
-    def Add_item(self,upc : str,name : str,quantity : int,price : int,description : str):
-        approved = { upc : str,name : str,quantity : int,price : int,description : str}
-
-        for arg,types in approved.items():
-            if type(arg) == types:
-                continue
-            else:
-                raise TypeError(f"Input {arg} is the wrong type")
-
+    def Add_item(self,upc : ProductCreate.upc,name : ProductCreate.name,quantity : ProductCreate.quantity,price : ProductCreate.price,description : ProductCreate.description):
+        validated_item = ProductCreate(upc=upc,name=name,quantity=quantity,price=price,description=description)
         with self.transaction.start_transaction() as conn:
-            self.repo.Add_product(upc, name, quantity, price, description,conn)
+            self.repo.Add_product(validated_item.upc, validated_item.name, validated_item.quantity, validated_item.price, validated_item.description,conn)
 
 
-    def Add_customer(self,name : str,number : str,email : str,timewith : int):
-        approved = {name : str, number : str, email : str , timewith : int}
 
-        for arg,types in approved.items():
-            if type(arg) == types:
-                continue
-            else:
-                raise TypeError(f"Input {arg} is the wrong type")
+    def Add_customer(self,name : CustomerCreate.name,number : CustomerCreate.number,email : CustomerCreate.email,timewith : CustomerCreate.timewith):
+        validated_customer = CustomerCreate(name=name,number=number,email=email,timewith=timewith)
         with self.transaction.start_transaction() as conn:
-            try:
-                self.repo.Add_customer_info(name, number, email, timewith,conn)
-            except Exception as e:
-                raise e
-
-
-
-
-    def Delete_item(self,product_id : str):
-        if type(product_id) == str and len(product_id) >= 32:
-            with self.transaction.start_transaction() as session:
-                if (deletedrowsql := self.repo.Delete_product_info(product_id=uuid.UUID(product_id),session= session)):
-                    deletedrow = [ProductDTO.model_validate(product,from_attributes=True) for product in deletedrowsql]
-                    return deletedrow
-                else:
-                    raise DeleteunknownproductError("could not find product attached to UUID please confirm correct UUID and retry",product_id)
-
-        elif type(product_id) != str:
-            raise TypeError("Product_id is wrong type must be a String")
-        elif len(product_id) < 32:
-            raise Invalididerror("enter Product id in one of the correct format listed",product_id,"Product")
+            self.repo.Add_customer_info(validated_customer.name, validated_customer.number, validated_customer.email, validated_customer.timewith,conn)
 
 
 
 
 
-    def Delete_customer(self,customer_id: str):
-        if type(customer_id) == str and len(customer_id) >= 32:
-            with self.transaction.start_transaction() as session:
-                if (deletedrowsql := self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)):
-                    deletedrow = [CustomerDTO.model_validate(customer) for customer in deletedrowsql]
-                    return deletedrow
+
+    def Delete_item(self, product_id : Product_ID):
+        validated_id = Product_ID(product_id = product_id)
+        with self.transaction.start_transaction() as session:
+            if (deletedrowsql := self.repo.Delete_product_info(product_id=validated_id.product_id,session= session)):
+                deletedrow = [ProductDTO.model_validate(product,from_attributes=True) for product in deletedrowsql]
+                return deletedrow
+            else:
+                raise DeleteunknownproductError("could not find product attached to UUID please confirm correct UUID and retry",product_id)
+
+
+
+    def Delete_customer(self, customer_id: Customer_ID):
+        validated_id = Customer_ID(customer_id = customer_id)
+        with self.transaction.start_transaction() as session:
+            if (deletedrowsql := self.repo.Delete_customer_info(customer_id=validated_id.customer_id,session= session)):# checks if row object is empty or not
+                deletedrow = [CustomerDTO.model_validate(customer) for customer in deletedrowsql]
+                return deletedrow
                 #self.repo.Delete_customer_info(customer_id=uuid.UUID(customer_id),session= session)
-                else:
-                    raise Deleteunknowncustomererror("enter customer id in one of the correct format listed",customer_id)
-        elif type(customer_id) != str:
-            raise TypeError("customer_id is wrong type must be a String")
-        elif len(customer_id) < 32:
-            raise Invalididerror("enter Customer id in one of the correct format listed",customer_id,"Customer")
+            else:
+                raise Deleteunknowncustomererror("enter customer id in one of the correct format listed",customer_id)
 
-    def Edit_item_info(self,item_id : str,upc = None,name = None,quantity = None,price = None,description = None):
+    def Edit_item_info(self,item_id : Product_ID,upc = None,name = None,quantity = None,price = None,description = None):
         update_check = {"upc": upc, "name": name, "quantity": quantity, "price": price, "description": description}
-        approved_types = {upc : str, name : str, quantity : int, price : int, description : str}
-        confirmed_updates = {}
-        if type(item_id) == str:
-            item_iduuid = uuid.UUID(item_id)
-        else:
-            raise TypeError("item_id must be a string")
-
-
-        for key, value in update_check.items():
-            if value is not None:
-                if type(value) != approved_types[value]:
-                    raise TypeError("incorrect type for edited column")
-                confirmed_updates[key] = value
-            else:
-                continue
+        validated_id = Product_ID(product_id=item_id)
+        validated_edits = ProductUpdate.model_validate(update_check).model_dump(exclude_none=True)
         with self.transaction.start_transaction() as conn:
-            self.repo.Edit_product_info(item_iduuid,confirmed_updates,conn)
-    def Edit_customer_info(self,customer_id: str , name = None, number = None, email = None, timewith = None):
+            self.repo.Edit_product_info(validated_id.product_id,validated_edits,conn)
+    def Edit_customer_info(self,customer_id: Customer_ID , name = None, number = None, email = None, timewith = None):
         update_check = {"name": name, "number": number, "email": email, "timewith": timewith}
-        approved_types = {name:str,number:str,email:str,timewith:int}
-        confirmed_updates = {}
-        if type(customer_id) == str:
-
-            customer_iduuid =uuid.UUID(customer_id)
-        else:
-            raise TypeError("customer_id must be str")
-        for key,value in update_check.items():
-            if value is not None:
-                if type(value) != approved_types[value]:
-                    raise TypeError("incorrect type for edited column")
-                confirmed_updates[key] = value
-            else:
-                continue
+        validated_id = Customer_ID(customer_id=customer_id)
+        validated_edits = CustomerUpdate.model_validate(update_check).model_dump(exclude_none=True)
         with self.transaction.start_transaction() as conn:
-            self.repo.Edit_customer_info(customer_iduuid,confirmed_updates,conn)
+            self.repo.Edit_customer_info(validated_id.customer_id,validated_edits,conn)
 
 
 
