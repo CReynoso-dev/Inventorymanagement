@@ -10,8 +10,9 @@ from SRC.Custom_Exceptions.Exception_handler import Registerexceptionhandlers
 from pydantic import UUID4
 app = FastAPI()
 Registerexceptionhandlers(app)
-def get_db(sql="sqlite",name="store.db"):
-    return Database(sql=sql,db_name=name)
+def get_db():
+    db = Database(sql="sqlite",db_name="store.db")
+    return db
 def get_trans_manager(db = Depends(get_db)):
     return Transaction_manager(db=db)
 def get_repo(db=Depends(get_db)):
@@ -20,20 +21,17 @@ def get_service(repo = Depends(get_repo),trans = Depends(get_trans_manager)):
     return Service(repository=repo,trans_manager=trans)
 
 
-@app.post("/customer/create")
+@app.post("/customer/create",status_code=200)
 def Add_customer(customer: CustomerCreate, service: Annotated[Service, Depends(get_service)]):
-    service.Add_customer(name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
+    new_customer = service.Add_customer(name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
+    return new_customer
 
 
 
-@app.post("/item/create",status_code=201)
+@app.post("/item/create",status_code=200)
 def Add_item(item : ProductCreate, service: Annotated[Service, Depends(get_service)]):
-    #need to improve error catching
-    try:
-        service.Add_item(upc=item.upc,name=item.name,quantity=item.quantity,price=item.price,description=item.description)
-        return True
-    except:
-        raise HTTPException(400,"Invalid request to add item")
+    new_item = service.Add_item(upc=item.upc,name=item.name,quantity=item.quantity,price=item.price,description=item.description)
+    return new_item
 @app.get("/customer/{customer_name}", response_model=list[CustomerResponse])
 def search_customer(customer_name: str,service : Annotated[Service,Depends(get_service)]):
     customers =service.Lookup_customer(customer_name)
