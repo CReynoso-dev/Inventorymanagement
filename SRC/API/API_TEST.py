@@ -7,6 +7,7 @@ from SRC.API.response_models import CustomerResponse,ProductResponse
 from SRC.API.request_models import CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
 from SRC.Transaction_manager.Transaction_manager import Transaction_manager
 from SRC.Custom_Exceptions.Exception_handler import Registerexceptionhandlers
+from pydantic import UUID4
 app = FastAPI()
 Registerexceptionhandlers(app)
 def get_db(sql="sqlite",name="store.db"):
@@ -39,11 +40,11 @@ def search_customer(customer_name: str,service : Annotated[Service,Depends(get_s
     result = [CustomerResponse.model_validate(customer, from_attributes=True) for customer in customers]
     return result
 @app.put("/customer/{customer_id}/edit")
-def customer_update(customer_id : str,customer : CustomerUpdate,service : Annotated[Service,Depends(get_service)]):
+def customer_update(customer_id : UUID4,customer : CustomerUpdate,service : Annotated[Service,Depends(get_service)]):
     service.Edit_customer_info(customer_id,name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
     return customer
 @app.delete("/customer/{customer_id}/delete")
-def customer_delete(customer_id : str,service : Annotated[Service,Depends(get_service)]):
+def customer_delete(customer_id : UUID4,service : Annotated[Service,Depends(get_service)]):
     deletedrow = service.Delete_customer(customer_id)
     return deletedrow
 
@@ -55,12 +56,12 @@ def item_data(item_name: str,service : Annotated[Service,Depends(get_service)]):
 
 
 @app.put("/item/{product_id}/edit")
-def item_update(product_id : str,item : ProductUpdate,service : Annotated[Service,Depends(get_service)]):
+def item_update(product_id : UUID4,item : ProductUpdate,service : Annotated[Service,Depends(get_service)]):
     service.Edit_item_info(product_id,upc=item.upc,name=item.name,quantity=item.quantity,price=item.price,description=item.description)
     return item
 
 @app.delete("/item/{product_id}/delete")
-def item_delete(product_id : str,service : Annotated[Service,Depends(get_service)]):
+def item_delete(product_id : UUID4,service : Annotated[Service,Depends(get_service)]):
     deletedrow = service.Delete_item(product_id)
     return deletedrow
 
