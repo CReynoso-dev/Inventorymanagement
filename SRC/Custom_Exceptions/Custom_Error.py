@@ -63,6 +63,24 @@ class Deleteunknowncustomererror(Exception):
     def __str__(self):
         return f"UUID: {self.searched_input} was not recognized\n{self.message}."
 
+class Editunknownproducterror(Exception):
+    def __init__(self,message,searched_input):
+        super().__init__(message)
+        self.message = message
+        self.searched_input = searched_input
+
+    def __str__(self):
+        return f"UUID: {self.searched_input} was not recognized\n{self.message}."
+
+class Editunknowncustomererror(Exception):
+    def __init__(self,message,searched_input):
+        super().__init__(message)
+        self.message = message
+        self.searched_input = searched_input
+
+    def __str__(self):
+        return f"UUID: {self.searched_input} was not recognized\n{self.message}."
+
 
 class Incorrectcustomeremailformaterror(Exception):
     def __init__(self, message,emailinputed):
