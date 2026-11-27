@@ -1,10 +1,10 @@
-from fastapi import FastAPI,Depends,Body,HTTPException
+from fastapi import FastAPI,Depends
 from SRC.Database.database import Database
 from SRC.Repo.Repository import Repository
 from SRC.Service.Service import Service
 from typing import Annotated
-from SRC.API.response_models import CustomerResponse,ProductResponse
-from SRC.API.request_models import CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
+from SRC.Schema.response_models.response_models import CustomerResponse,ProductResponse
+from SRC.Schema.request_models.request_models import CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
 from SRC.Transaction_manager.Transaction_manager import Transaction_manager
 from SRC.Custom_Exceptions.Exception_handler import Registerexceptionhandlers
 from pydantic import UUID4
@@ -39,8 +39,8 @@ def search_customer(customer_name: str,service : Annotated[Service,Depends(get_s
     return result
 @app.put("/customer/{customer_id}/edit")
 def customer_update(customer_id : UUID4,customer : CustomerUpdate,service : Annotated[Service,Depends(get_service)]):
-    service.Edit_customer_info(customer_id,name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
-    return customer
+    updated_info =service.Edit_customer_info(customer_id,name=customer.name,number=customer.number,email=customer.email,timewith=customer.timewith)
+    return updated_info
 @app.delete("/customer/{customer_id}/delete")
 def customer_delete(customer_id : UUID4,service : Annotated[Service,Depends(get_service)]):
     deletedrow = service.Delete_customer(customer_id)
@@ -55,8 +55,8 @@ def item_data(item_name: str,service : Annotated[Service,Depends(get_service)]):
 
 @app.put("/item/{product_id}/edit")
 def item_update(product_id : UUID4,item : ProductUpdate,service : Annotated[Service,Depends(get_service)]):
-    service.Edit_item_info(product_id,upc=item.upc,name=item.name,quantity=item.quantity,price=item.price,description=item.description)
-    return item
+    updated_info = service.Edit_item_info(product_id,upc=item.upc,name=item.name,quantity=item.quantity,price=item.price,description=item.description)
+    return updated_info
 
 @app.delete("/item/{product_id}/delete")
 def item_delete(product_id : UUID4,service : Annotated[Service,Depends(get_service)]):
