@@ -1,10 +1,10 @@
 
-from SRC.Service.dto_models import ProductDTO,CustomerDTO
+from SRC.Schema.DTO_models.dto_models import ProductDTO,CustomerDTO
 from SRC.Repo.Repository import Repository
 from SRC.Transaction_manager.Transaction_manager import Transaction_manager
-from SRC.Custom_Exceptions.Custom_Error import Deleteunknowncustomererror,Invalididerror,DeleteunknownproductError,OutofstockError,ProductnotfoundError,CustomernotfoundError
-from SRC.API.request_models import Customer_ID,Product_ID,CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
-from SRC.API.response_models import CustomerResponse
+from SRC.Custom_Exceptions.Custom_Error import Deleteunknowncustomererror, DeleteunknownproductError, \
+    ProductnotfoundError,CustomernotfoundError
+from SRC.Schema.request_models.request_models import Customer_ID,Product_ID,CustomerCreate,ProductCreate,CustomerUpdate,ProductUpdate
 from pydantic import UUID4
 class Service():
     def __init__(self,repository : Repository,trans_manager : Transaction_manager):
@@ -41,15 +41,17 @@ class Service():
     def Add_item(self,upc : str,name : str,quantity : int,price : int,description :str):
         validated_item = ProductCreate(upc=upc,name=name,quantity=quantity,price=price,description=description)
         with self.transaction.start_transaction() as conn:
-            self.repo.Add_product(validated_item.upc, validated_item.name, validated_item.quantity, validated_item.price, validated_item.description,conn)
-            return validated_item
+            item =self.repo.Add_product(validated_item.upc, validated_item.name, validated_item.quantity, validated_item.price, validated_item.description,conn)
+            new_item = ProductDTO.model_validate(item,from_attributes=True)
+            return new_item
 
 
     def Add_customer(self,name : str,number : str,email : str,timewith : int):
         validated_customer = CustomerCreate(name=name,number=number,email=email,timewith=timewith)
         with self.transaction.start_transaction() as conn:
-            self.repo.Add_customer_info(validated_customer.name, validated_customer.number, validated_customer.email, validated_customer.timewith,conn)
-            return validated_customer
+            customer = self.repo.Add_customer_info(validated_customer.name, validated_customer.number, validated_customer.email, validated_customer.timewith,conn)
+            new_customer = CustomerDTO.model_validate(customer,from_attributes=True)
+            return new_customer
 
 
 
@@ -81,14 +83,19 @@ class Service():
         validated_id = Product_ID(product_id=item_id)
         validated_edits = ProductUpdate.model_validate(update_check).model_dump(exclude_none=True,exclude_unset =True)
         with self.transaction.start_transaction() as conn:
-            self.repo.Edit_product_info(validated_id.product_id,validated_edits,conn)
+            product = self.repo.Edit_product_info(validated_id.product_id,validated_edits,conn)
+            updated_product =ProductDTO.model_validate(product[0],from_attributes=True)
+            return updated_product
+
 
     def Edit_customer_info(self,customer_id: UUID4 , name = None, number = None, email = None, timewith = None):
         update_check = {"name": name, "number": number, "email": email, "timewith": timewith}
         validated_id = Customer_ID(customer_id=customer_id)
         validated_edits = CustomerUpdate.model_validate(update_check).model_dump(exclude_none=True,exclude_unset= True)
         with self.transaction.start_transaction() as conn:
-            self.repo.Edit_customer_info(validated_id.customer_id,validated_edits,conn)
+            customer =self.repo.Edit_customer_info(validated_id.customer_id,validated_edits,conn)
+            updated_customer = CustomerDTO.model_validate(customer[0],from_attributes=True)
+            return updated_customer
 
 
 

@@ -1,11 +1,9 @@
-import uuid
-
 from SRC.Database.database import Database
-from sqlalchemy import select,delete,inspect,update
+from sqlalchemy import delete, update
 from sqlalchemy.orm import Session
 from SRC.Database.database import Customer,Product
-from SRC.Custom_Exceptions.Custom_Error import Editunknownproducterror,Editunknowncustomererror,Deleteunknowncustomererror,ProductnotfoundError,CustomernotfoundError,DeleteunknownproductError
-from SRC.API.request_models import Customer_ID,Product_ID,CustomerUpdate
+from SRC.Custom_Exceptions.Custom_Error import Editunknownproducterror,Editunknowncustomererror,Deleteunknowncustomererror, \
+    DeleteunknownproductError
 from pydantic import UUID4
 class Repository():
     def __init__(self,db : Database):
@@ -35,6 +33,7 @@ class Repository():
             try:
                 product = Product(upc = upc ,name = name ,quantity = quantity, price = price, description = description)
                 session.add(product)
+                session.flush()
                 return product
             except Exception as e:
                 raise e
@@ -46,6 +45,7 @@ class Repository():
         try:
             customer = Customer(name = name, number = number,email = email, timewith = timewith)
             session.add(customer)
+            session.flush()
             return customer
         except Exception as e:
             raise e
