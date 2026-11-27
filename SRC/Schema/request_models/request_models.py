@@ -28,7 +28,7 @@ class CustomerUpdate(BaseModel):
     name: str | None = Field(default=None,min_length=1,max_length=50)
     number: USPhoneNumber | None = None
     email: EmailStr | None = None
-    timewith: int | None = Field(ge=0,default=None)
+    timewith: int | None = Field(ge=0,le=100,default=None)
     model_config = ConfigDict(from_attributes=True)
 
     @model_validator(mode="after")
@@ -39,16 +39,16 @@ class CustomerUpdate(BaseModel):
 class ProductCreate(BaseModel):
     upc: str = Field(min_length=12,max_length=12)
     name: str = Field(min_length=1,max_length=80)
-    quantity: int = Field(ge=0)
-    price: int = Field(ge=0)
+    quantity: int = Field(ge=0,le=10000)
+    price: int = Field(ge=0,le=10000)
     description: str = Field(max_length=99)
     model_config = ConfigDict(from_attributes=True)
 
 class ProductUpdate(BaseModel):
     upc: str | None = Field(default= None,min_length=12,max_length=12)
     name: str | None = Field(default=None,min_length=1,max_length=80)
-    quantity: int | None = Field(ge=0,default=None)
-    price: int | None = Field(ge=0,default=None)
+    quantity: int | None = Field(ge=0,le=10000,default=None)
+    price: int | None = Field(ge=0,le=10000,default=None)
     description: str | None = Field(default=None,max_length=99)
     model_config = ConfigDict(from_attributes=True)
 
