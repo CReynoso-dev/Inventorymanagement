@@ -2,10 +2,10 @@
 
 A backend-focused inventory management application designed to help small businesses track inventory, customers, and sales while remaining simple enough for users with limited technical experience.
 
-The project is being developed as a REST API using Python, FastAPI, SQLAlchemy, Pydantic, and SQLite. A PySide6 desktop interface is also included as an unfinished client-side prototype and may later be connected to the API.
+The project is being developed as a REST API using Python 3.14, FastAPI, SQLAlchemy, Pydantic, and SQLite. A PySide6 desktop interface is also included as an unfinished client-side prototype and may later be connected to the API.
 
 > **Project Status:** Active Development  
-> Product and customer CRUD operations are implemented across the SQLAlchemy repository, service, and FastAPI layers. Pydantic request and response models are integrated. Existing automated tests require refactoring following changes to the implementation. Database session management, transaction handling, validation, and API error handling are still being improved.
+> On the [`refactor/transaction-management` branch](https://github.com/CReynoso-dev/Inventorymanagement/tree/refactor/transaction-management), all eight product and customer CRUD endpoints passed live checks on Python 3.14.10. The service now uses a transaction manager, validates inputs with Pydantic, and returns records with their generated IDs. The repository and service tests still need to be updated.
 
 ---
 
@@ -58,7 +58,7 @@ Current repository functionality includes:
 
 Basic product and customer CRUD operations are implemented. Name searches use prefix matching and return matching records, while edits and deletions identify records by UUID.
 
-The repository currently manages its own database sessions and commits. Refactoring session ownership and transaction boundaries is a planned improvement.
+Each repository method receives a SQLAlchemy session from the service. Inserts call `flush()` so the generated UUID is available before commit. Edits and deletions use SQL `RETURNING` to retrieve the affected record. The transaction manager owns the commit, rollback, and session cleanup.
 
 ### Service Layer
 
@@ -67,22 +67,27 @@ The service layer sits between the application interface and repository layer.
 Current service functionality includes:
 
 - Product and customer creation, lookup, editing, and deletion through the repository
-- Basic input type checks for creation, lookup, and deletion methods
-- Conversion of string identifiers to UUIDs for edits and deletions
-- Building partial updates from edit fields whose values are not `None`
-- Passing repository results to the API layer
+- Validating product and customer creation and edits with shared Pydantic models
+- Validating edit and delete identifiers as UUIDv4
+- Applying only non-null edit fields, including valid values such as `quantity=0`
+- Converting database results into `ProductDTO` and `CustomerDTO` objects while the session is open
 
-Database and repository instances are passed through constructors using dependency injection.
-
-Validation and error handling are still being refined. Future work includes coordinating transactions at the service level or through a dedicated transaction-management abstraction.
+The repository and transaction manager are passed to the service through its constructor. Each service operation opens a transaction and passes its session to the repository.
 
 ### Automated Tests
 
 **Status: Existing Tests Require Refactoring**
 
-The repository contains pytest tests for the repository and service layers. However, these tests are currently broken following changes to how repository methods return data and how the application handles database operations.
+The repository contains pytest tests for the database, repository, and service layers. On Python 3.14.10, collection stops in `Test_repository.py` and `Test_service.py`. Both still construct `Service(repo)`, which now also requires a transaction manager. Several tests also use older repository signatures or index returned records by position.
 
-The existing tests will need to be revised to match the updated implementation.
+The test filenames start with `Test_`. From the repository root, run:
+
+```bash
+python -m pip install pytest
+python -m pytest -o "python_files=Test_*.py" Test
+```
+
+With `--continue-on-collection-errors`, pytest reports **1 passed and 2 collection errors**. Separate live HTTP checks passed for all eight endpoints on the same Python version.
 
 Planned testing work includes:
 
@@ -93,48 +98,43 @@ Planned testing work includes:
 - Improve test database isolation and cleanup
 - Add FastAPI endpoint integration tests
 
-**Automated test coverage is not currently verified.**
+Test coverage has yet to be measured.
 
 ### FastAPI REST API
 
-**Status: Basic CRUD Endpoints Implemented / In Progress**
+**Status: Product and Customer CRUD Implemented**
 
-FastAPI is now integrated with the existing service and repository layers.
+FastAPI is integrated with the existing service and repository layers. The routes in `SRC/API/API_TEST.py` expose the following operations.
 
-Current API functionality includes:
+| Operation | Products | Customers | Successful response |
+| --- | --- | --- | --- |
+| Create | `POST /item/create` | `POST /customer/create` | Created record with its UUID |
+| Search by name prefix | `GET /item/{item_name}` | `GET /customer/{customer_name}` | List of matching records |
+| Edit by UUID | `PUT /item/{product_id}/edit` | `PUT /customer/{customer_id}/edit` | Updated record |
+| Delete by UUID | `DELETE /item/{product_id}/delete` | `DELETE /customer/{customer_id}/delete` | One-element list containing the deleted record |
 
-- Creating products
-- Creating customers
-- Searching for products by name
-- Searching for customers by name
-- Updating product information
-- Updating customer information
-- Deleting products
-- Deleting customers
+Separate Pydantic models validate creates and partial updates. A product UPC must be a string of exactly 12 ASCII digits, so `"012345678905"` retains its leading zero. Quantity and price accept integers from 0 through 10,000. Customer models validate email addresses and US phone numbers. Search routes use dedicated response models.
 
-The API uses dependency injection to provide database, repository, and service objects to endpoint functions.
+All eight routes return `200` on success. A name search with no matches or an edit or delete for an unknown UUID returns `404`. An invalid UUID, an invalid field, or an edit containing only omitted or null fields returns `422`.
 
-Pydantic models are implemented for validating request data and defining response structures.
+**Run the API locally**
 
-Separate request models exist for creating and updating products and customers. Response models are implemented for product and customer search operations.
+Check out `refactor/transaction-management`. From the repository root, create a virtual environment with `python3.14 -m venv .venv` (macOS or Linux) or `py -3.14 -m venv .venv` (Windows). Activate it, then run:
 
-**Current limitations:**
+```bash
+python -m pip install fastapi uvicorn "SQLAlchemy>=2,<3" "pydantic[email]>=2,<3" pydantic-extra-types phonenumbers
+python -c "from SRC.API.API_TEST import get_db; get_db().Create_Tables()"
+python -m uvicorn SRC.API.API_TEST:app --reload
+```
 
-- Session lifecycle management requires refactoring
-- Transaction handling needs improvement
-- Error responses are not yet consistently implemented
-- Update operations require further validation and refinement
-- Create endpoints currently return Boolean success values rather than created resource representations
-- Dedicated record retrieval by UUID is not yet implemented
-- API integration tests are not yet implemented
+The initialization command creates the tables in `SRC/Database/store.db`. Open [Swagger UI](http://127.0.0.1:8000/docs) to try the routes.
 
-Planned API functionality includes:
+**Planned API work**
 
-- Improved REST response structures and HTTP status handling
-- Product and customer retrieval by UUID
-- Sales creation and retrieval
-- Inventory quantity updates
-- Improved validation and exception handling
+- Add dedicated product and customer retrieval by UUID.
+- Refine response models and HTTP status codes for writes.
+- Add sales creation and retrieval, including automatic stock adjustments when a sale is recorded.
+- Add endpoint integration tests to the repository.
 
 The API is intended to allow different clients to communicate with the same backend without depending directly on the database implementation.
 
@@ -180,7 +180,7 @@ SQLite Database
 
 Each layer has a separate responsibility:
 
-**API Layer — Implemented / In Progress**  
+**API Layer**  
 Receives HTTP requests, uses Pydantic request and response models, calls service methods, and returns HTTP responses.
 
 **Service Layer**  
@@ -192,26 +192,22 @@ Handles database queries and persistence operations using SQLAlchemy.
 **Database Layer**  
 Defines SQLAlchemy models, relationships, sessions, and database configuration.
 
-**Planned Transaction Management**
+**Transaction Management**
 
-The next architectural improvement focuses on establishing clear session ownership and transaction boundaries.
-
-The intended design will allow multiple repository operations to participate in a shared transaction, with commits and rollbacks coordinated outside individual repository methods.
-
-This will help maintain data consistency when implementing multi-step operations such as processing sales and updating inventory.
+`Transaction_manager.start_transaction()` obtains a fresh session from the database’s `sessionmaker`. It commits when the service operation succeeds, rolls back and re-raises the exception when it fails, and always closes the session. A future sale can use this boundary to record line items and adjust stock together.
 
 ---
 
 ## Technology Stack
 
-- **Python** — Primary programming language
+- **Python 3.14** — Primary programming language
 - **FastAPI** — REST API and dependency injection
 - **SQLAlchemy** — ORM and database interaction
 - **SQLite** — Current development database
-- **Pydantic** — API request validation and response models
-- **pytest** — Testing framework; existing tests require refactoring
+- **Pydantic v2** — Request validation, response models, and data transfer objects
+- **pytest** — Automated database, repository, and service tests
 - **PySide6** — Desktop client prototype
-- **UUID** — Record identifiers
+- **UUIDv4** — Record identifiers
 - **Git / GitHub** — Version control
 
 ---
@@ -225,8 +221,10 @@ Inventorymanagement/
 |   |-- API/
 |   |   |-- API_TEST.py
 |   |   |-- main.py
-|   |   |-- request_models.py
-|   |   |-- response_models.py
+|   |
+|   |-- Custom_Exceptions/
+|   |   |-- Custom_Error.py
+|   |   |-- Exception_handler.py
 |   |
 |   |-- Database/
 |   |   |-- database.py
@@ -234,8 +232,16 @@ Inventorymanagement/
 |   |-- Repo/
 |   |   |-- Repository.py
 |   |
+|   |-- Schema/
+|   |   |-- DTO_models/dto_models.py
+|   |   |-- request_models/request_models.py
+|   |   |-- response_models/response_models.py
+|   |
 |   |-- Service/
-|       |-- Service.py
+|   |   |-- Service.py
+|   |
+|   |-- Transaction_manager/
+|       |-- Transaction_manager.py
 |
 |-- GUI/
 |   |-- Unfinished PySide6 client prototype
@@ -271,12 +277,13 @@ Planned development includes:
 - [x] Build initial FastAPI CRUD endpoints
 - [x] Connect FastAPI endpoints to the service layer
 - [x] Implement basic FastAPI dependency injection
-- [ ] Refine database session lifecycle and ownership
-- [ ] Implement coordinated transaction management
-- [ ] Remove transaction commits from individual repository operations
-- [ ] Improve error handling and validation
-- [ ] Add meaningful business exceptions and HTTP error responses
-- [ ] Refine partial-update behavior
+- [x] Refine database session lifecycle and ownership
+- [x] Implement coordinated transaction management
+- [x] Remove transaction commits from individual repository operations
+- [x] Validate UUIDv4 identifiers, 12-digit UPCs, customer contact details, and numeric ranges
+- [x] Return product and customer DTOs from service operations
+- [x] Add meaningful business exceptions and HTTP error responses
+- [x] Refine partial-update behavior
 - [ ] Improve API response structures and HTTP status codes
 - [ ] Add dedicated UUID-based retrieval endpoints
 - [ ] Refactor and repair repository and service CRUD tests
@@ -328,7 +335,7 @@ One of the main goals of the project is not only to build working functionality,
 
 The SQLAlchemy models, basic product and customer repository operations, service methods, Pydantic models, and initial FastAPI CRUD endpoints are implemented.
 
-The current focus is improving database session management and transaction boundaries before expanding the application's functionality. Existing automated tests also need to be refactored to match the updated implementation.
+Session ownership, transaction boundaries, and partial updates are implemented. The next step is to bring the automated tests in line with the repository’s session argument, the service’s transaction-manager dependency, and the DTOs returned by service methods.
 
 The development sequence is:
 
@@ -348,13 +355,13 @@ Pydantic Request and Response Models — Implemented
 FastAPI CRUD Endpoints — Implemented
         |
         v
-Session Lifecycle Management — Next
+Session Lifecycle Management — Implemented
         |
         v
-Transaction Coordination — Planned
+Transaction Coordination — Implemented
         |
         v
-Error Handling and Validation — Planned
+Product and Customer Error Handling and Validation — Implemented
         |
         v
 Automated CRUD Tests — Require Refactoring
@@ -363,7 +370,7 @@ Automated CRUD Tests — Require Refactoring
 Expanded Testing and Sales Functionality — Planned
 ```
 
-The immediate objective is to establish reliable session and transaction management so that future multi-step operations can maintain database consistency, then restore and expand automated test coverage.
+The immediate objective is to cover the behavior the API now supports, including zero-stock updates, invalid UPCs, missing UUIDs, and rollback when a write fails.
 
 ---
 
