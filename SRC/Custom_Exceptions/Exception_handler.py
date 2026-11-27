@@ -17,7 +17,7 @@ def Registerexceptionhandlers(app :FastAPI):
     app.add_exception_handler(Invalididerror,invalididerror)
 
 def EmptyEditerrorhandler(request : Request, exc : EmptyEditerror):
-    return JSONResponse(status_code=404,content={"detail":str(exc)})
+    return JSONResponse(status_code=422,content={"detail":str(exc)})
 def Editunknownproducterrorhandler(request : Request, exc : Editunknownproducterror):
     return JSONResponse(status_code=404,content={"detail":str(exc)})
 def Editunknowncustomererrorhandler(request : Request, exc : Editunknowncustomererror):
