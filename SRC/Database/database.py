@@ -1,11 +1,8 @@
 import uuid
-from typing import List,Optional
-from contextlib import contextmanager
-from sqlalchemy import create_engine,column,Integer,String,ForeignKey,text,Select,CheckConstraint
-from sqlalchemy.orm import sessionmaker,Session,mapped_column,Mapped,validates,relationship,DeclarativeBase
-from email_validator import validate_email,EmailNotValidError
+from typing import List
+from sqlalchemy import create_engine,Integer,String,ForeignKey
+from sqlalchemy.orm import sessionmaker,mapped_column,Mapped,relationship,DeclarativeBase
 from pathlib import Path
-from SRC.Custom_Exceptions.Custom_Error import Incorrectcustomeremailformaterror
 
 def new_uuid() -> uuid.UUID:
     # Note: Work around UUIDs with leading zeros: https://github.com/tiangolo/sqlmodel/issues/25
@@ -21,8 +18,8 @@ class Customer(Base):
     __tablename__ = "Customer_info"
     customer_id : Mapped[uuid.UUID] = mapped_column(primary_key=True,default=new_uuid)
     name : Mapped[str] = mapped_column(String(50))
-    number : Mapped[str] = mapped_column(String(10))
-    email : Mapped[str] = mapped_column(String(55))
+    number : Mapped[str] = mapped_column(String(14))
+    email : Mapped[str] = mapped_column(String(99))
     timewith : Mapped[int] = mapped_column(Integer)
 
     sales : Mapped[List["Sales"]] = relationship(back_populates="customer")
@@ -80,7 +77,7 @@ class Database():
         #self.cursor = Session(self.engine)
 
 
-        self.Create_Tables()
+
 
 
     def Create_Tables(self):

@@ -13,6 +13,7 @@ Registerexceptionhandlers(app)
 def get_db():
     db = Database(sql="sqlite",db_name="store.db")
     return db
+
 def get_trans_manager(db = Depends(get_db)):
     return Transaction_manager(db=db)
 def get_repo(db=Depends(get_db)):

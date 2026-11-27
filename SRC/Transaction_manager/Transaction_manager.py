@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from sqlalchemy.orm import sessionmaker,Session
 
 
 from SRC.Database.database import Database
@@ -24,13 +23,7 @@ class Transaction_manager():
 
 
 
-    def end_transaction(self,session : Session):
-        try:
-            session.commit()
-            session.close()
-        except:
-            session.rollback()
-            raise "error"
+
 
 
 

@@ -1,7 +1,5 @@
-import uuid
 
-from pydantic import BaseModel,ConfigDict,AfterValidator,BeforeValidator,field_validator,Field,model_validator
-from SRC.Custom_Exceptions.Custom_Error import Incorrectcustomernumberlengtherror,Incorrectcustomernumbernxxformaterror
+from pydantic import BaseModel,ConfigDict,Field,model_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic import EmailStr,UUID4
 from SRC.Custom_Exceptions.Custom_Error import EmptyEditerror
@@ -37,7 +35,7 @@ class CustomerUpdate(BaseModel):
             raise EmptyEditerror("No edits were made please enter a edit to Customer and try again")
         return self
 class ProductCreate(BaseModel):
-    upc: str = Field(min_length=12,max_length=12)
+    upc: str = Field(min_length=12,max_length=12,pattern=r"^[0-9]{12}$")
     name: str = Field(min_length=1,max_length=80)
     quantity: int = Field(ge=0,le=10000)
     price: int = Field(ge=0,le=10000)
@@ -45,7 +43,7 @@ class ProductCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class ProductUpdate(BaseModel):
-    upc: str | None = Field(default= None,min_length=12,max_length=12)
+    upc: str | None = Field(default= None,min_length=12,max_length=12,pattern=r"^[0-9]{12}$")
     name: str | None = Field(default=None,min_length=1,max_length=80)
     quantity: int | None = Field(ge=0,le=10000,default=None)
     price: int | None = Field(ge=0,le=10000,default=None)
